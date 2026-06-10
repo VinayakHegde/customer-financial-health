@@ -2237,3 +2237,341 @@ Functionally fine for SQLite at this scale — `ORDER BY` in queries controls so
 3. R3 across process restarts remains untested (documented known limit).
 
 No changes required before moving to S3 unless you want to harden any of the above proactively.
+
+---
+
+_**User**_
+
+/ac in a new feature branch
+
+---
+
+_**Agent (default)**_
+
+Inspecting changes and creating atomic commits on a new feature branch.
+
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git status && echo "---" && git diff --stat && echo "---" && git log -5 --oneline</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git status && echo "---" && git diff --stat && echo "---" && git log -5 --oneline
+```
+
+```
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add &lt;file&gt;..." to update what will be committed)
+  (use "git restore &lt;file&gt;..." to discard changes in working directory)
+	modified:   .gitignore
+	modified:   .specstory/statistics.json
+	modified:   docs/PROMPT_HISTORY.md
+	modified:   package-lock.json
+	modified:   package.json
+	modified:   tests/_helpers/makeDb.ts
+
+Untracked files:
+  (use "git add &lt;file&gt;..." to include in what will be committed)
+	.specstory/history/2026-06-10_22-33-18Z-s2-implementation.md
+	docs/ai/sessions/S011-implement-s2.md
+	drizzle.config.ts
+	drizzle/
+	lib/db/
+	tests/s2/
+
+no changes added to commit (use "git add" and/or "git commit -a")
+---
+ .gitignore                 |    3 +
+ .specstory/statistics.json |    9 +
+ docs/PROMPT_HISTORY.md     |    3 +-
+ package-lock.json          | 4798 +++++++++++++++++++++++++++++---------------
+ package.json               |    1 +
+ tests/_helpers/makeDb.ts   |   32 +-
+ 6 files changed, 3175 insertions(+), 1671 deletions(-)
+---
+5847307 Merge pull request #13 from VinayakHegde/feat/affordability
+bc31e59 docs(customer-financial-health): add S010 commit SHAs to session snapshot
+7146d6a docs(customer-financial-health): record S010 S1 implementation session
+73ae42b feat(customer-financial-health): implement S1 affordability domain with tests
+fa0bcd3 Merge pull request #12 from VinayakHegde/feat/test-helpers
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+Changes will be grouped into atomic commits.
+
+Five atomic commits are planned: dependency updates, database schema, test helpers, S2 tests, and documentation. Auto-generated specstory files may be skipped if they are gitignored.</details></think>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/vinayakhegde/source/personal/customer-financial-health/.gitignore",
+  "pattern": "specstory"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/vinayakhegde/source/personal/customer-financial-health/.gitignore",
+  "pattern": "specstory",
+  "topFiles": [],
+  "totalFiles": 0,
+  "totalMatches": 0
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git ls-files .specstory | head -10</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git ls-files .specstory | head -10
+```
+
+```
+.specstory/.gitignore
+.specstory/history/2026-06-10_08-18-43Z-command-or-feature-discussion.md
+.specstory/history/2026-06-10_10-20-18Z-next.js-app-setup-with-typescript-and-tailwind-css.md
+.specstory/history/2026-06-10_10-49-02Z-task-analysis-for-ai-session-s001.md
+.specstory/history/2026-06-10_11-12-19Z-minimal-rulesync-setup-for-product-development.md
+.specstory/history/2026-06-10_12-51-06Z-lean-prd-template-definition.md
+.specstory/history/2026-06-10_13-29-42Z-ophelos-engineering-take-home-task.md
+.specstory/history/2026-06-10_15-57-27Z-discovery-notes-refinement-based-on-prd.md
+.specstory/history/2026-06-10_16-33-38Z-product-requirements-document-guidelines.md
+.specstory/history/2026-06-10_17-12-45Z-document-review-findings-and-recommendations.md
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+Planning atomic commits in a specific order.
+
+Settled on three atomic commits: drizzle-kit dependency, S2 persistence layer with tests and helpers, then documentation.
+
+Finalized the commit messages. The first covers drizzle-kit dependencies. The second covers the S2 persistence layer, repository tests, and database helpers. The third records the implementation session. A fourth commit may handle the specstory file.
+
+The feature branch will be named `feat/s2-persistence`. The `.specstory` file may be committed separately or included in the documentation commit.</details></think>
+
+_**Agent (default)**_
+
+Creating branch `feat/s2-persistence` and splitting into atomic commits: deps, implementation+tests, then docs.
+
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git checkout -b feat/s2-persistence</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git checkout -b feat/s2-persistence
+```
+
+```
+Switched to a new branch 'feat/s2-persistence'
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git add package.json package-lock.json && git commit -m "$(cat <<'EOF'
+chore(customer-financial-health): add drizzle-kit for SQL migrations
+
+EOF
+)"</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git add package.json package-lock.json && git commit -m "$(cat <<'EOF'
+chore(customer-financial-health): add drizzle-kit for SQL migrations
+
+EOF
+)"
+```
+
+```
+[feat/s2-persistence c06556e] chore(customer-financial-health): add drizzle-kit for SQL migrations
+ 2 files changed, 3149 insertions(+), 1650 deletions(-)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git add lib/db/ drizzle/ drizzle.config.ts .gitignore tests/_helpers/makeDb.ts tests/s2/ && git commit -m "$(cat <<'EOF'
+feat(customer-financial-health): implement S2 persistence layer with repository tests
+
+Add SQLite + Drizzle schema, migrations, and append-only snapshot repository.
+Wire makeDb() to production migrate path; cover T9–T12 round-trip, immutability,
+nullable band, and logging hygiene.
+EOF
+)"</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git add lib/db/ drizzle/ drizzle.config.ts .gitignore tests/_helpers/makeDb.ts tests/s2/ && git commit -m "$(cat <<'EOF'
+feat(customer-financial-health): implement S2 persistence layer with repository tests
+
+Add SQLite + Drizzle schema, migrations, and append-only snapshot repository.
+Wire makeDb() to production migrate path; cover T9–T12 round-trip, immutability,
+nullable band, and logging hygiene.
+EOF
+)"
+```
+
+```
+[feat/s2-persistence eb28331] feat(customer-financial-health): implement S2 persistence layer with repository tests
+ 15 files changed, 495 insertions(+), 20 deletions(-)
+ create mode 100644 drizzle.config.ts
+ create mode 100644 drizzle/0000_naive_groot.sql
+ create mode 100644 drizzle/meta/0000_snapshot.json
+ create mode 100644 drizzle/meta/_journal.json
+ create mode 100644 lib/db/client.ts
+ create mode 100644 lib/db/index.ts
+ create mode 100644 lib/db/migrate.ts
+ create mode 100644 lib/db/schema.ts
+ create mode 100644 lib/db/snapshots.ts
+ create mode 100644 tests/s2/t10-immutability.test.ts
+ create mode 100644 tests/s2/t11-no-data-band.test.ts
+ create mode 100644 tests/s2/t12-logging-hygiene.test.ts
+ create mode 100644 tests/s2/t9-round-trip.test.ts
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git add docs/ai/sessions/S011-implement-s2.md docs/PROMPT_HISTORY.md .specstory/statistics.json .specstory/history/2026-06-10_22-33-18Z-s2-implementation.md && git commit -m "$(cat <<'EOF'
+docs(customer-financial-health): record S011 S2 implementation session
+
+EOF
+)"</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git add docs/ai/sessions/S011-implement-s2.md docs/PROMPT_HISTORY.md .specstory/statistics.json .specstory/history/2026-06-10_22-33-18Z-s2-implementation.md && git commit -m "$(cat <<'EOF'
+docs(customer-financial-health): record S011 S2 implementation session
+
+EOF
+)"
+```
+
+```
+[feat/s2-persistence 07a19e1] docs(customer-financial-health): record S011 S2 implementation session
+ 4 files changed, 2317 insertions(+), 1 deletion(-)
+ create mode 100644 .specstory/history/2026-06-10_22-33-18Z-s2-implementation.md
+ create mode 100644 docs/ai/sessions/S011-implement-s2.md
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git status && echo "---" && git log main..HEAD --oneline</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git status && echo "---" && git log main..HEAD --oneline
+```
+
+```
+On branch feat/s2-persistence
+nothing to commit, working tree clean
+---
+07a19e1 docs(customer-financial-health): record S011 S2 implementation session
+eb28331 feat(customer-financial-health): implement S2 persistence layer with repository tests
+c06556e chore(customer-financial-health): add drizzle-kit for SQL migrations
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+Created branch `feat/s2-persistence` with 3 atomic commits:
+
+| Commit | Message |
+|---|---|
+| `c06556e` | `chore(customer-financial-health): add drizzle-kit for SQL migrations` |
+| `eb28331` | `feat(customer-financial-health): implement S2 persistence layer with repository tests` |
+| `07a19e1` | `docs(customer-financial-health): record S011 S2 implementation session` |
+
+**Split rationale**
+- **chore** — dependency only (`package.json`, `package-lock.json`)
+- **feat** — implementation + tests together (`lib/db/`, `drizzle/`, `makeDb.ts`, `tests/s2/`, `.gitignore`)
+- **docs** — session artefacts (`S011` snapshot, `PROMPT_HISTORY.md`, SpecStory history)
+
+Working tree is clean. Say if you want this pushed or opened as a PR.
