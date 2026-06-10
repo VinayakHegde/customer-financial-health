@@ -1,0 +1,32 @@
+// Rulesync configuration.
+// Targets are intentionally narrow: Cursor (this IDE) and Claude Code.
+// Add other tools later if they join the workflow.
+{
+  "$schema": "https://github.com/dyoshikawa/rulesync/releases/latest/download/config-schema.json",
+
+  // Tools to generate native configuration for.
+  "targets": ["cursor", "claudecode"],
+
+  // Features to translate from .rulesync/ source-of-truth.
+  // - rules, commands, subagents, skills mirror the four .rulesync/ folders.
+  // - ignore lets us declare deny-paths once via .rulesync/.aiignore.
+  // - hooks / mcp / permissions are intentionally NOT enabled yet — add when needed.
+  "features": ["rules", "commands", "subagents", "skills", "ignore"],
+
+  "outputRoots": ["."],
+
+  // Delete previously-generated tool files before re-emitting, so removed
+  // .rulesync/ entries don't leave orphans behind.
+  "delete": true,
+
+  // Cursor natively supports only rules + ignore + mcp + hooks. Simulate the
+  // rest so /commands, the critic subagent, and the phase-gate skill are
+  // available in Cursor too. (Claude Code supports all of these natively.)
+  "simulateCommands": true,
+  "simulateSubagents": true,
+  "simulateSkills": true,
+
+  // `rulesync gitignore` should only manage entries for the tools we target.
+  // The default is true; set explicitly for clarity.
+  "gitignoreTargetsOnly": true
+}
