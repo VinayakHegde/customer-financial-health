@@ -17,8 +17,10 @@ This is **phase 2 of 5** in the workflow defined by `.rulesync/rules/00-workflow
 ## Inputs to load
 
 - `docs/discovery/NOTES.md` (required, primary source).
+- `docs/Ophelos Engineering Take-Home Task.pdf` (the brief — cite directly for any requirement that traces to a brief MUST / SHOULD / Stretch).
 - `docs/PRD.md` if it already exists (refine, preserving existing requirement IDs).
-- `docs/TASK_ANALYSIS.md` for background context only.
+
+Note: a pre-brief analysis lived at `docs/TASK_ANALYSIS.md` and was withdrawn in S003 (D-14). The PRD must not cite the withdrawn doc and must not reintroduce its dropped scope items (see `docs/discovery/NOTES.md` §7(b)): repayment-plan selection, arrangement confirmation, collections workflow, agent review processes, arrears-management tooling, `POST /api/arrangements`, agent-facing UI.
 
 ## Output
 

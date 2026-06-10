@@ -11,9 +11,11 @@ This is **phase 1 of 5** in the workflow defined by `.rulesync/rules/00-workflow
 
 ## Inputs to load
 
-- `docs/TASK_ANALYSIS.md` if present.
+- `docs/Ophelos Engineering Take-Home Task.pdf` (the brief — sole binding upstream source for scope).
 - `docs/discovery/NOTES.md` if it already exists (append/refine, don't overwrite).
 - Anything the user has linked in the current message.
+
+Note: a pre-brief analysis lived at `docs/TASK_ANALYSIS.md` and was withdrawn in S003 (D-14) because it scoped a collections / arrangement-journey workflow the brief does not ask for. Useful substance was inlined into `docs/discovery/NOTES.md`. Do not reintroduce the withdrawn doc.
 
 ## Output
 
