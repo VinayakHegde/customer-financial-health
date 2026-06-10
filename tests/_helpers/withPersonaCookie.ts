@@ -1,13 +1,21 @@
 import { vi } from "vitest";
+import { PERSONA_COOKIE_NAME } from "../../lib/identity/persona-cookie";
 
-let activePersonaId: string | null = null;
+const personaCookieState = vi.hoisted(() => ({
+  activeId: null as string | null,
+}));
 
 vi.mock("next/headers", () => ({
   cookies: async () => ({
     get: (name: string) =>
-      name === "personaId" && activePersonaId !== null
-        ? { value: activePersonaId }
+      name === PERSONA_COOKIE_NAME && personaCookieState.activeId !== null
+        ? { value: personaCookieState.activeId }
         : undefined,
+    set: (name: string, value: string) => {
+      if (name === PERSONA_COOKIE_NAME) {
+        personaCookieState.activeId = value;
+      }
+    },
   }),
 }));
 
@@ -16,13 +24,13 @@ vi.mock("next/headers", () => ({
  * in `afterEach` (or invoke it directly) to restore the default null state.
  */
 export function withPersonaCookie(personaId: string | null): () => void {
-  activePersonaId = personaId;
+  personaCookieState.activeId = personaId;
   return () => {
-    activePersonaId = null;
+    personaCookieState.activeId = null;
   };
 }
 
 /** Reads the persona id currently installed by {@link withPersonaCookie}. */
 export function getActivePersonaIdForTests(): string | null {
-  return activePersonaId;
+  return personaCookieState.activeId;
 }

@@ -119,3 +119,8 @@ export const personas: Persona[] = [
 export function getPersonaById(id: string): Persona | undefined {
   return personas.find((persona) => persona.id === id);
 }
+
+/** Personas that receive a starting snapshot when the DB is first opened. */
+export function getPersonasForSeeding(): Persona[] {
+  return personas.filter((persona) => persona.id !== "riley");
+}
