@@ -1,6 +1,7 @@
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { applyMigrations } from "./migrate";
+import { seedStartingSnapshotsIfEmpty } from "./seed";
 import { createSnapshotRepository, type SnapshotRepository } from "./snapshots";
 
 const DB_PATH = `${process.cwd()}/.data/financial-health.sqlite`;
@@ -16,6 +17,7 @@ export function getSnapshotRepository(): SnapshotRepository {
   const db = drizzle(sqlite);
   applyMigrations(db, DB_PATH);
   repository = createSnapshotRepository(db);
+  seedStartingSnapshotsIfEmpty(db, repository);
   return repository;
 }
 
