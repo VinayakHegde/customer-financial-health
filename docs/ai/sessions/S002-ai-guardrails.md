@@ -18,7 +18,7 @@ Stand up a minimal Rulesync configuration focused on five workflow phases — pr
 ## Context given to AI
 
 - Empty `.rulesync/{rules,commands,subagents,skills}` directories already present in the repo.
-- `docs/TASK_ANALYSIS.md` (S001) describes the problem space and recommended MVP.
+- `docs/TASK_ANALYSIS.md` (S001) describes the problem space and recommended MVP. _(Note added retroactively: this artefact was withdrawn in S003 D-14; the brief is now the sole binding source. See `docs/ai/sessions/S003-discovery.md`.)_
 - Project ai-history rule mandates curated session snapshots in `docs/ai/sessions/` and updates to `docs/PROMPT_HISTORY.md`.
 - `AGENTS.md` notes that this Next.js version may differ from training-data assumptions, so any future implementation rules must defer to in-repo Next docs.
 
@@ -88,6 +88,6 @@ npm run rulesync -- generate --check                                       # ide
 ## Handoff for next session
 
 1. Decide whether to commit `.claude/settings.json` (rulesync's intended shared Claude Code deny list).
-2. Run `/discovery` to capture the first product-discovery pass against `docs/TASK_ANALYSIS.md` as input material.
+2. Run `/discovery` to capture the first product-discovery pass against `docs/TASK_ANALYSIS.md` as input material. _(Superseded in S003: the official engineering brief (`docs/Ophelos Engineering Take-Home Task.pdf`) was added and used as the sole binding source; `docs/TASK_ANALYSIS.md` was subsequently withdrawn in S003 D-14. See `docs/ai/sessions/S003-discovery.md`.)_
 3. Add implementation-specific rules (coding style, file layout, test framework) only when implementation actually starts; remember to run `npm run rulesync -- generate` after any `.rulesync/` edit.
 4. Suggested next session ID: **S003 — discovery pass**.
