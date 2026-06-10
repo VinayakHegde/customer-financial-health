@@ -24,6 +24,8 @@
   },
   "include": [
     "next-env.d.ts",
+    "vitest-setup.ts",
+    "vitest-axe.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
