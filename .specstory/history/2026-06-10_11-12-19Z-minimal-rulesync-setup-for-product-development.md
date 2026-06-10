@@ -3601,4 +3601,1906 @@ _**Agent (claude-opus-4-7)**_
 
 Now I'm reviewing all the pending changes to organize them into logical commits: the rulesync installation and configuration, the workflow rules and slash-commands, and the critic subagent setup. I'll group these by intent so each commit represents a single, cohesive feature or configuration change.
 
-For the documentation commit, I'm including the session transcript, prompt history, and the statistics file since it's auto-managed metadata from the session itself. I'm still deciding whether to commit `.claude/settings.json` — it's part of the rulesync design but requires an explicit decision from the user about whether to track it.</details></think>
+For the documentation commit, I'm including the session transcript, prompt history, and the statistics file since it's auto-managed metadata from the session itself. I'm still deciding whether to commit `.claude/settings.json` — it's part of the rulesync design but requires an explicit decision from the user about whether to track it. I'm leaning toward not committing `.claude/settings.json` since `.rulesync/` is the source of truth and users can generate their own copy when they run rulesync. Now I'm thinking through how to structure the commits themselves — the `.rulesync/` files all relate to AI guardrails as one feature, but the user might prefer finer-grained commits for each concept like phase rules, commands, and subagents. I'll start with a commit for the rulesync installation and npm script, then organize the guardrail files from there. The user wants finer granularity, so I'm reconsidering the commit structure. I'm leaning toward 5-6 commits to keep each one focused on a single intent, but I'm noticing that commit #4 is mixing concerns—commands, the critic subagent, and the phase-gate skill probably deserve to be split further.
+
+Actually, thinking about it more, those are all user-facing surfaces of the workflow system, so keeping them together makes sense. I'll stick with 6 commits and skip committing `.claude/settings.json` since it's not essential. Let me verify the full scope of files I'm about to commit across all six commits.
+
+I've got the modified files like package.json and .gitignore, the new rulesync configuration and rules, the commands and subagents, the skill definitions, and the session documentation. The `.specstory/statistics.json` is just metadata so I'll include it with the session docs. I'm deliberately excluding `.claude/settings.json` since the user didn't specify whether to commit it, and I'll mention that in the summary.
+
+Since the changes are mostly configuration and documentation files, I don't need to worry about linting hooks—biome typically only checks the `src/` directory anyway. I'll proceed with normal commits.</details></think>
+
+_**Agent (claude-opus-4-7)**_
+
+I'll create the `ai-guardrails` branch and split the changes into atomic commits. Let me first inspect everything and plan the grouping.
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git status --short && echo "---" && git diff --stat && echo "---" && git log --oneline -5</summary>
+
+```bash
+git status --short && echo "---" && git diff --stat && echo "---" && git log --oneline -5
+```
+
+```
+ M .gitignore
+ M .specstory/statistics.json
+D  CLAUDE.md
+ M docs/PROMPT_HISTORY.md
+ M package-lock.json
+ M package.json
+?? .claude/
+?? .rulesync/
+?? .specstory/history/2026-06-10_11-12-19Z-minimal-rulesync-setup-for-product-development.md
+?? docs/ai/sessions/S002-ai-guardrails.md
+?? rulesync.jsonc
+---
+ .gitignore                 |   21 +
+ .specstory/statistics.json |    9 +
+ docs/PROMPT_HISTORY.md     |    1 +
+ package-lock.json          | 3812 ++++++++++++++++++++++++++++++++++++++++----
+ package.json               |    4 +-
+ 5 files changed, 3548 insertions(+), 299 deletions(-)
+---
+80bb830 Merge pull request #2 from VinayakHegde/docs/task-analysis
+b355f7b Merge pull request #1 from VinayakHegde/feat/scaffold
+af152f5 prompt history
+1140f85 docs(customer-financial-health): record S001 task analysis commit hashes
+4173435 chore(customer-financial-health): capture SpecStory task analysis transcript
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+<think><details><summary>Thought Process</summary>
+ I've confirmed the scope follows the existing convention, so I'm ready to create the branch and start with the commits. First, I'll install rulesync and add the npm script to package.json, then configure rulesync in the next commit.
+
+After that, I'm adding the gated five-phase AI workflow rules, followed by the phase commands, critic subagent, and phase-gate skill. Then I'll update .gitignore to exclude rulesync-generated files and remove CLAUDE.md from tracking. Finally, I'll document the S002 ai-guardrails session across the relevant history and statistics files.
+
+I'm skipping .claude/ entirely for now since the user can decide how to handle it later—settings.json isn't gitignored but everything else inside is, so it's cleaner to leave that decision to them.</details></think>
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write">
+<details>
+<summary>Tool use: **todo_write**</summary>
+
+
+Parameters:
+
+```json
+{
+  "merge": true
+}
+```
+Result:
+
+```json
+{
+  "finalTodos": [
+    {
+      "content": "Create and switch to ai-guardrails branch",
+      "id": "branch",
+      "status": "in_progress"
+    },
+    {
+      "content": "Commit: install rulesync + npm script (package.json, package-lock.json)",
+      "id": "c1-install",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: rulesync config + .aiignore",
+      "id": "c2-config",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: gated five-phase workflow rules",
+      "id": "c3-rules",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: phase commands, critic subagent, phase-gate skill",
+      "id": "c4-surface",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: ignore rulesync-generated tool files + untrack CLAUDE.md",
+      "id": "c5-gitignore",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: S002 session docs + raw transcript",
+      "id": "c6-session",
+      "status": "pending"
+    }
+  ],
+  "initialTodos": [
+    {
+      "content": "Install rulesync as a devDependency",
+      "id": "install",
+      "status": "completed"
+    },
+    {
+      "content": "Create rulesync.jsonc targeting cursor + claudecode",
+      "id": "config",
+      "status": "completed"
+    },
+    {
+      "content": "Run rulesync init (will skip existing files)",
+      "id": "init",
+      "status": "completed"
+    },
+    {
+      "content": "Add npm scripts for rulesync generate/check/gitignore",
+      "id": "scripts",
+      "status": "completed"
+    },
+    {
+      "content": "Run rulesync generate",
+      "id": "generate",
+      "status": "completed"
+    },
+    {
+      "content": "Run rulesync gitignore --targets cursor,claudecode and tidy .gitignore",
+      "id": "gitignore",
+      "status": "completed"
+    },
+    {
+      "content": "Update S002 session snapshot with install + generate results",
+      "id": "snapshot",
+      "status": "completed"
+    }
+  ],
+  "success": true
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
+<summary>Tool use: **todo_write**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+Planned commits on `ai-guardrails` (existing convention: `<type>(customer-financial-health): …`):
+
+1. `chore`: install rulesync + npm script — `package.json`, `package-lock.json`
+2. `chore`: configure rulesync for cursor + claudecode targets — `rulesync.jsonc`, `.rulesync/.aiignore`
+3. `feat`: gated five-phase AI workflow rules — `.rulesync/rules/*`
+4. `feat`: phase commands, critic subagent, phase-gate skill — `.rulesync/{commands,subagents,skills}/*`
+5. `chore`: ignore rulesync-generated tool files + untrack `CLAUDE.md` — `.gitignore` + `CLAUDE.md` deletion
+6. `docs`: record S002 ai-guardrails session — `docs/PROMPT_HISTORY.md`, `docs/ai/sessions/S002-ai-guardrails.md`, `.specstory/history/…`, `.specstory/statistics.json`
+
+I'll **skip `.claude/settings.json`** (still untracked, awaiting your decision from the previous turn).
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git checkout -b ai-guardrails && git status --short</summary>
+
+```bash
+git checkout -b ai-guardrails && git status --short
+```
+
+```
+Switched to a new branch 'ai-guardrails'
+ M .gitignore
+ M .specstory/statistics.json
+D  CLAUDE.md
+ M docs/PROMPT_HISTORY.md
+ M package-lock.json
+ M package.json
+?? .claude/
+?? .rulesync/
+?? .specstory/history/2026-06-10_11-12-19Z-minimal-rulesync-setup-for-product-development.md
+?? docs/ai/sessions/S002-ai-guardrails.md
+?? rulesync.jsonc
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write">
+<details>
+<summary>Tool use: **todo_write**</summary>
+
+
+Parameters:
+
+```json
+{
+  "merge": true
+}
+```
+Result:
+
+```json
+{
+  "finalTodos": [
+    {
+      "content": "Create and switch to ai-guardrails branch",
+      "id": "branch",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: install rulesync + npm script (package.json, package-lock.json)",
+      "id": "c1-install",
+      "status": "in_progress"
+    },
+    {
+      "content": "Commit: rulesync config + .aiignore",
+      "id": "c2-config",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: gated five-phase workflow rules",
+      "id": "c3-rules",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: phase commands, critic subagent, phase-gate skill",
+      "id": "c4-surface",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: ignore rulesync-generated tool files + untrack CLAUDE.md",
+      "id": "c5-gitignore",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: S002 session docs + raw transcript",
+      "id": "c6-session",
+      "status": "pending"
+    }
+  ],
+  "initialTodos": [
+    {
+      "content": "Create and switch to ai-guardrails branch",
+      "id": "branch",
+      "status": "in_progress"
+    },
+    {
+      "content": "Commit: install rulesync + npm script (package.json, package-lock.json)",
+      "id": "c1-install",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: rulesync config + .aiignore",
+      "id": "c2-config",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: gated five-phase workflow rules",
+      "id": "c3-rules",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: phase commands, critic subagent, phase-gate skill",
+      "id": "c4-surface",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: ignore rulesync-generated tool files + untrack CLAUDE.md",
+      "id": "c5-gitignore",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: S002 session docs + raw transcript",
+      "id": "c6-session",
+      "status": "pending"
+    }
+  ],
+  "success": true,
+  "wasMerge": true
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
+<summary>Tool use: **todo_write**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+### Commit 1 — install rulesync
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git add package.json package-lock.json && git commit -m "$(cat <<'EOF'
+chore(customer-financial-health): install rulesync and add npm script
+
+Adds rulesync@^8.27.0 as a devDependency and exposes it via a single
+`rulesync` npm script that forwards all arguments to the CLI
+(`npm run rulesync -- generate`, `npm run rulesync -- gitignore ...`).
+EOF
+)"</summary>
+
+```bash
+git add package.json package-lock.json && git commit -m "$(cat <<'EOF'
+chore(customer-financial-health): install rulesync and add npm script
+
+Adds rulesync@^8.27.0 as a devDependency and exposes it via a single
+`rulesync` npm script that forwards all arguments to the CLI
+(`npm run rulesync -- generate`, `npm run rulesync -- gitignore ...`).
+EOF
+)"
+```
+
+```
+[ai-guardrails 0a4134c] chore(customer-financial-health): install rulesync and add npm script
+ 3 files changed, 3517 insertions(+), 300 deletions(-)
+ delete mode 100644 CLAUDE.md
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+<think><details><summary>Thought Process</summary>
+ Ah, I see what happened — the deletion of CLAUDE.md was already staged from my earlier `git rm --cached` command, so when I added the other files, that staged deletion came along with them and got included in the commit.
+
+The problem is that now the first commit has two unrelated changes: installing rulesync and deleting CLAUDE.md. I need to separate these since the deletion logically belongs with the .gitignore change in commit 5. Let me reset the last commit with `git reset --soft HEAD~1` to keep the changes staged, then unstage just the CLAUDE.md deletion so I can recommit things properly. I see the issue now — the staged deletion of CLAUDE.md persists across commands, so when I commit package.json and package-lock.json, the deletion gets included automatically. I can either reset and use `git reset HEAD -- CLAUDE.md` to unstage it temporarily, or use `git commit -- specific-files` to commit only those files while leaving other staged changes untouched. Option B is cleaner, so let me reset the commit and try that approach instead.</details></think>
+
+_**Agent (claude-opus-4-7)**_
+
+Wait — I accidentally rolled the `CLAUDE.md` deletion (left staged from the earlier `git rm --cached`) into commit 1. That breaks atomicity. Let me reset and redo using file-scoped commits so staged changes elsewhere are unaffected.
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git reset --soft HEAD~1 && git status --short</summary>
+
+```bash
+git reset --soft HEAD~1 && git status --short
+```
+
+```
+ M .gitignore
+ M .specstory/statistics.json
+D  CLAUDE.md
+ M docs/PROMPT_HISTORY.md
+M  package-lock.json
+M  package.json
+?? .claude/
+?? .rulesync/
+?? .specstory/history/2026-06-10_11-12-19Z-minimal-rulesync-setup-for-product-development.md
+?? docs/ai/sessions/S002-ai-guardrails.md
+?? rulesync.jsonc
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git commit -m "$(cat <<'EOF'
+chore(customer-financial-health): install rulesync and add npm script
+
+Adds rulesync@^8.27.0 as a devDependency and exposes it via a single
+`rulesync` npm script that forwards all arguments to the CLI
+(`npm run rulesync -- generate`, `npm run rulesync -- gitignore ...`).
+EOF
+)" -- package.json package-lock.json</summary>
+
+```bash
+git commit -m "$(cat <<'EOF'
+chore(customer-financial-health): install rulesync and add npm script
+
+Adds rulesync@^8.27.0 as a devDependency and exposes it via a single
+`rulesync` npm script that forwards all arguments to the CLI
+(`npm run rulesync -- generate`, `npm run rulesync -- gitignore ...`).
+EOF
+)" -- package.json package-lock.json
+```
+
+```
+[ai-guardrails 922468e] chore(customer-financial-health): install rulesync and add npm script
+ 2 files changed, 3517 insertions(+), 299 deletions(-)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+Clean — only `package.json` and `package-lock.json`. CLAUDE.md deletion is still staged for later.
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write">
+<details>
+<summary>Tool use: **todo_write**</summary>
+
+
+Parameters:
+
+```json
+{
+  "merge": true
+}
+```
+Result:
+
+```json
+{
+  "finalTodos": [
+    {
+      "content": "Create and switch to ai-guardrails branch",
+      "id": "branch",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: install rulesync + npm script (package.json, package-lock.json)",
+      "id": "c1-install",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: rulesync config + .aiignore",
+      "id": "c2-config",
+      "status": "in_progress"
+    },
+    {
+      "content": "Commit: gated five-phase workflow rules",
+      "id": "c3-rules",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: phase commands, critic subagent, phase-gate skill",
+      "id": "c4-surface",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: ignore rulesync-generated tool files + untrack CLAUDE.md",
+      "id": "c5-gitignore",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: S002 session docs + raw transcript",
+      "id": "c6-session",
+      "status": "pending"
+    }
+  ],
+  "initialTodos": [
+    {
+      "content": "Create and switch to ai-guardrails branch",
+      "id": "branch",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: install rulesync + npm script (package.json, package-lock.json)",
+      "id": "c1-install",
+      "status": "in_progress"
+    },
+    {
+      "content": "Commit: rulesync config + .aiignore",
+      "id": "c2-config",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: gated five-phase workflow rules",
+      "id": "c3-rules",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: phase commands, critic subagent, phase-gate skill",
+      "id": "c4-surface",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: ignore rulesync-generated tool files + untrack CLAUDE.md",
+      "id": "c5-gitignore",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: S002 session docs + raw transcript",
+      "id": "c6-session",
+      "status": "pending"
+    }
+  ],
+  "success": true,
+  "wasMerge": true
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
+<summary>Tool use: **todo_write**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+### Commit 2 — rulesync config
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git commit -m "$(cat <<'EOF'
+chore(customer-financial-health): configure rulesync for cursor and claudecode targets
+
+Adds rulesync.jsonc targeting only Cursor and Claude Code, with command,
+subagent, and skill simulation enabled so Cursor sees the full feature
+set. .rulesync/.aiignore declares deny paths once for all tools.
+EOF
+)" -- rulesync.jsonc .rulesync/.aiignore</summary>
+
+```bash
+git commit -m "$(cat <<'EOF'
+chore(customer-financial-health): configure rulesync for cursor and claudecode targets
+
+Adds rulesync.jsonc targeting only Cursor and Claude Code, with command,
+subagent, and skill simulation enabled so Cursor sees the full feature
+set. .rulesync/.aiignore declares deny paths once for all tools.
+EOF
+)" -- rulesync.jsonc .rulesync/.aiignore
+```
+
+```
+error: pathspec 'rulesync.jsonc' did not match any file(s) known to git
+error: pathspec '.rulesync/.aiignore' did not match any file(s) known to git
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+<think><details><summary>Thought Process</summary>
+ I need to stage the untracked files with `git add` before committing, since `git commit -- path` only works on files that are already tracked.</details></think>
+
+_**Agent (claude-opus-4-7)**_
+
+Untracked files need staging first.
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git add rulesync.jsonc .rulesync/.aiignore && git status --short && echo "---" && git diff --cached --stat</summary>
+
+```bash
+git add rulesync.jsonc .rulesync/.aiignore && git status --short && echo "---" && git diff --cached --stat
+```
+
+```
+ M .gitignore
+A  .rulesync/.aiignore
+ M .specstory/statistics.json
+D  CLAUDE.md
+ M docs/PROMPT_HISTORY.md
+A  rulesync.jsonc
+?? .claude/
+?? .rulesync/commands/
+?? .rulesync/rules/
+?? .rulesync/skills/
+?? .rulesync/subagents/
+?? .specstory/history/2026-06-10_11-12-19Z-minimal-rulesync-setup-for-product-development.md
+?? docs/ai/sessions/S002-ai-guardrails.md
+---
+ .rulesync/.aiignore |  1 +
+ CLAUDE.md           |  1 -
+ rulesync.jsonc      | 32 ++++++++++++++++++++++++++++++++
+ 3 files changed, 33 insertions(+), 1 deletion(-)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+<think><details><summary>Thought Process</summary>
+ I see the staged deletion of CLAUDE.md in the diff, so I need to scope my commit to specific files to avoid rolling that change into this commit.</details></think>
+
+_**Agent (claude-opus-4-7)**_
+
+The pre-staged `CLAUDE.md` deletion is still in the index — I'll scope this commit to just the two new files.
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git commit -m "$(cat <<'EOF'
+chore(customer-financial-health): configure rulesync for cursor and claudecode targets
+
+Adds rulesync.jsonc targeting only Cursor and Claude Code, with command,
+subagent, and skill simulation enabled so Cursor sees the full feature
+set. .rulesync/.aiignore declares deny paths once for all tools.
+EOF
+)" -- rulesync.jsonc .rulesync/.aiignore</summary>
+
+```bash
+git commit -m "$(cat <<'EOF'
+chore(customer-financial-health): configure rulesync for cursor and claudecode targets
+
+Adds rulesync.jsonc targeting only Cursor and Claude Code, with command,
+subagent, and skill simulation enabled so Cursor sees the full feature
+set. .rulesync/.aiignore declares deny paths once for all tools.
+EOF
+)" -- rulesync.jsonc .rulesync/.aiignore
+```
+
+```
+[ai-guardrails 38b2148] chore(customer-financial-health): configure rulesync for cursor and claudecode targets
+ 2 files changed, 33 insertions(+)
+ create mode 100644 .rulesync/.aiignore
+ create mode 100644 rulesync.jsonc
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write">
+<details>
+<summary>Tool use: **todo_write**</summary>
+
+
+Parameters:
+
+```json
+{
+  "merge": true
+}
+```
+Result:
+
+```json
+{
+  "finalTodos": [
+    {
+      "content": "Create and switch to ai-guardrails branch",
+      "id": "branch",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: install rulesync + npm script (package.json, package-lock.json)",
+      "id": "c1-install",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: rulesync config + .aiignore",
+      "id": "c2-config",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: gated five-phase workflow rules",
+      "id": "c3-rules",
+      "status": "in_progress"
+    },
+    {
+      "content": "Commit: phase commands, critic subagent, phase-gate skill",
+      "id": "c4-surface",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: ignore rulesync-generated tool files + untrack CLAUDE.md",
+      "id": "c5-gitignore",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: S002 session docs + raw transcript",
+      "id": "c6-session",
+      "status": "pending"
+    }
+  ],
+  "initialTodos": [
+    {
+      "content": "Create and switch to ai-guardrails branch",
+      "id": "branch",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: install rulesync + npm script (package.json, package-lock.json)",
+      "id": "c1-install",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: rulesync config + .aiignore",
+      "id": "c2-config",
+      "status": "in_progress"
+    },
+    {
+      "content": "Commit: gated five-phase workflow rules",
+      "id": "c3-rules",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: phase commands, critic subagent, phase-gate skill",
+      "id": "c4-surface",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: ignore rulesync-generated tool files + untrack CLAUDE.md",
+      "id": "c5-gitignore",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: S002 session docs + raw transcript",
+      "id": "c6-session",
+      "status": "pending"
+    }
+  ],
+  "success": true,
+  "wasMerge": true
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
+<summary>Tool use: **todo_write**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+### Commit 3 — workflow rules
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git add .rulesync/rules/ && git commit -m "$(cat <<'EOF'
+feat(customer-financial-health): add gated five-phase AI workflow rules
+
+Introduces the project's non-negotiable AI process:
+- 00-workflow.md (root): discovery → PRD → tech spec → test plan →
+  controlled implementation, with a canonical artefact and gate per phase.
+- 10-evidence.md: anti-fabrication and traceability rules
+  (stable R*/S*/T* IDs, no invented requirements or regulatory citations,
+  no PII or secrets in docs).
+EOF
+)" -- .rulesync/rules</summary>
+
+```bash
+git add .rulesync/rules/ && git commit -m "$(cat <<'EOF'
+feat(customer-financial-health): add gated five-phase AI workflow rules
+
+Introduces the project's non-negotiable AI process:
+- 00-workflow.md (root): discovery → PRD → tech spec → test plan →
+  controlled implementation, with a canonical artefact and gate per phase.
+- 10-evidence.md: anti-fabrication and traceability rules
+  (stable R*/S*/T* IDs, no invented requirements or regulatory citations,
+  no PII or secrets in docs).
+EOF
+)" -- .rulesync/rules
+```
+
+```
+[ai-guardrails 52699ba] feat(customer-financial-health): add gated five-phase AI workflow rules
+ 2 files changed, 74 insertions(+)
+ create mode 100644 .rulesync/rules/00-workflow.md
+ create mode 100644 .rulesync/rules/10-evidence.md
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write">
+<details>
+<summary>Tool use: **todo_write**</summary>
+
+
+Parameters:
+
+```json
+{
+  "merge": true
+}
+```
+Result:
+
+```json
+{
+  "finalTodos": [
+    {
+      "content": "Create and switch to ai-guardrails branch",
+      "id": "branch",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: install rulesync + npm script (package.json, package-lock.json)",
+      "id": "c1-install",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: rulesync config + .aiignore",
+      "id": "c2-config",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: gated five-phase workflow rules",
+      "id": "c3-rules",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: phase commands, critic subagent, phase-gate skill",
+      "id": "c4-surface",
+      "status": "in_progress"
+    },
+    {
+      "content": "Commit: ignore rulesync-generated tool files + untrack CLAUDE.md",
+      "id": "c5-gitignore",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: S002 session docs + raw transcript",
+      "id": "c6-session",
+      "status": "pending"
+    }
+  ],
+  "initialTodos": [
+    {
+      "content": "Create and switch to ai-guardrails branch",
+      "id": "branch",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: install rulesync + npm script (package.json, package-lock.json)",
+      "id": "c1-install",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: rulesync config + .aiignore",
+      "id": "c2-config",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: gated five-phase workflow rules",
+      "id": "c3-rules",
+      "status": "in_progress"
+    },
+    {
+      "content": "Commit: phase commands, critic subagent, phase-gate skill",
+      "id": "c4-surface",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: ignore rulesync-generated tool files + untrack CLAUDE.md",
+      "id": "c5-gitignore",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: S002 session docs + raw transcript",
+      "id": "c6-session",
+      "status": "pending"
+    }
+  ],
+  "success": true,
+  "wasMerge": true
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
+<summary>Tool use: **todo_write**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+### Commit 4 — commands, subagent, skill
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git add .rulesync/commands/ .rulesync/subagents/ .rulesync/skills/ && git commit -m "$(cat <<'EOF'
+feat(customer-financial-health): add phase commands, critic subagent, and phase-gate skill
+
+User-facing surface for the gated workflow:
+- Five slash-commands, one per phase: /discovery, /prd, /tech-spec,
+  /test-plan, /implement. Each refuses to proceed if upstream artefacts
+  are missing, and /implement is scoped to a single tech-spec section.
+- critic subagent: read-only reviewer used between phases; produces a
+  structured critique only, never writes files or code.
+- phase-gate skill: shared header and traceability-table schema that
+  every phase document follows, so the format stays consistent.
+EOF
+)" -- .rulesync/commands .rulesync/subagents .rulesync/skills</summary>
+
+```bash
+git add .rulesync/commands/ .rulesync/subagents/ .rulesync/skills/ && git commit -m "$(cat <<'EOF'
+feat(customer-financial-health): add phase commands, critic subagent, and phase-gate skill
+
+User-facing surface for the gated workflow:
+- Five slash-commands, one per phase: /discovery, /prd, /tech-spec,
+  /test-plan, /implement. Each refuses to proceed if upstream artefacts
+  are missing, and /implement is scoped to a single tech-spec section.
+- critic subagent: read-only reviewer used between phases; produces a
+  structured critique only, never writes files or code.
+- phase-gate skill: shared header and traceability-table schema that
+  every phase document follows, so the format stays consistent.
+EOF
+)" -- .rulesync/commands .rulesync/subagents .rulesync/skills
+```
+
+```
+[ai-guardrails ac6ff05] feat(customer-financial-health): add phase commands, critic subagent, and phase-gate skill
+ 7 files changed, 317 insertions(+)
+ create mode 100644 .rulesync/commands/discovery.md
+ create mode 100644 .rulesync/commands/implement.md
+ create mode 100644 .rulesync/commands/prd.md
+ create mode 100644 .rulesync/commands/tech-spec.md
+ create mode 100644 .rulesync/commands/test-plan.md
+ create mode 100644 .rulesync/skills/phase-gate/SKILL.md
+ create mode 100644 .rulesync/subagents/critic.md
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write">
+<details>
+<summary>Tool use: **todo_write**</summary>
+
+
+Parameters:
+
+```json
+{
+  "merge": true
+}
+```
+Result:
+
+```json
+{
+  "finalTodos": [
+    {
+      "content": "Create and switch to ai-guardrails branch",
+      "id": "branch",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: install rulesync + npm script (package.json, package-lock.json)",
+      "id": "c1-install",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: rulesync config + .aiignore",
+      "id": "c2-config",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: gated five-phase workflow rules",
+      "id": "c3-rules",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: phase commands, critic subagent, phase-gate skill",
+      "id": "c4-surface",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: ignore rulesync-generated tool files + untrack CLAUDE.md",
+      "id": "c5-gitignore",
+      "status": "in_progress"
+    },
+    {
+      "content": "Commit: S002 session docs + raw transcript",
+      "id": "c6-session",
+      "status": "pending"
+    }
+  ],
+  "initialTodos": [
+    {
+      "content": "Create and switch to ai-guardrails branch",
+      "id": "branch",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: install rulesync + npm script (package.json, package-lock.json)",
+      "id": "c1-install",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: rulesync config + .aiignore",
+      "id": "c2-config",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: gated five-phase workflow rules",
+      "id": "c3-rules",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: phase commands, critic subagent, phase-gate skill",
+      "id": "c4-surface",
+      "status": "in_progress"
+    },
+    {
+      "content": "Commit: ignore rulesync-generated tool files + untrack CLAUDE.md",
+      "id": "c5-gitignore",
+      "status": "pending"
+    },
+    {
+      "content": "Commit: S002 session docs + raw transcript",
+      "id": "c6-session",
+      "status": "pending"
+    }
+  ],
+  "success": true,
+  "wasMerge": true
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
+<summary>Tool use: **todo_write**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+### Commit 5 — gitignore + CLAUDE.md untrack
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git add .gitignore && git diff --cached --stat && echo "---" && git commit -m "$(cat <<'EOF'
+chore(customer-financial-health): ignore rulesync-generated tool files and untrack CLAUDE.md
+
+Appends the rulesync-managed gitignore block (via
+`npm run rulesync -- gitignore --targets cursor,claudecode`) so that
+the generated .cursor/, .claude/, .cursorignore, and CLAUDE.md are kept
+out of version control. The previously hand-authored CLAUDE.md (a
+one-line `@AGENTS.md` redirect) is now regenerated by rulesync and is
+removed from tracking with `git rm --cached`.
+
+The --targets flag is required: without it, rulesync also appends
+AGENTS.md ignore entries, but this repo's AGENTS.md is hand-authored
+and must stay committed.
+EOF
+)" -- .gitignore CLAUDE.md</summary>
+
+```bash
+git add .gitignore && git diff --cached --stat && echo "---" && git commit -m "$(cat <<'EOF'
+chore(customer-financial-health): ignore rulesync-generated tool files and untrack CLAUDE.md
+
+Appends the rulesync-managed gitignore block (via
+`npm run rulesync -- gitignore --targets cursor,claudecode`) so that
+the generated .cursor/, .claude/, .cursorignore, and CLAUDE.md are kept
+out of version control. The previously hand-authored CLAUDE.md (a
+one-line `@AGENTS.md` redirect) is now regenerated by rulesync and is
+removed from tracking with `git rm --cached`.
+
+The --targets flag is required: without it, rulesync also appends
+AGENTS.md ignore entries, but this repo's AGENTS.md is hand-authored
+and must stay committed.
+EOF
+)" -- .gitignore CLAUDE.md
+```
+
+```
+ .gitignore | 21 +++++++++++++++++++++
+ CLAUDE.md  |  1 -
+ 2 files changed, 21 insertions(+), 1 deletion(-)
+---
+[ai-guardrails 09e7377] chore(customer-financial-health): ignore rulesync-generated tool files and untrack CLAUDE.md
+ 2 files changed, 46 insertions(+), 1 deletion(-)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+<think><details><summary>Thought Process</summary>
+ I'm noticing a mismatch between the diff statistics—the staged changes showed 21 insertions for .gitignore, but the commit message indicates 46 insertions total. Let me figure out what's going on here.</details></think>
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git show --stat HEAD</summary>
+
+```bash
+git show --stat HEAD
+```
+
+```
+commit 09e7377b94b5bb55f4dd4de45f92d64d73211c47
+Author: Vinayak Hegde &lt;vinayak.nandi@gmail.com&gt;
+Date:   Wed Jun 10 12:54:47 2026 +0100
+
+    chore(customer-financial-health): ignore rulesync-generated tool files and untrack CLAUDE.md
+    
+    Appends the rulesync-managed gitignore block (via
+    &#96;npm run rulesync -- gitignore --targets cursor,claudecode&#96;) so that
+    the generated .cursor/, .claude/, .cursorignore, and CLAUDE.md are kept
+    out of version control. The previously hand-authored CLAUDE.md (a
+    one-line &#96;@AGENTS.md&#96; redirect) is now regenerated by rulesync and is
+    removed from tracking with &#96;git rm --cached&#96;.
+    
+    The --targets flag is required: without it, rulesync also appends
+    AGENTS.md ignore entries, but this repo's AGENTS.md is hand-authored
+    and must stay committed.
+
+ .gitignore | 21 +++++++++++++++++++++
+ CLAUDE.md  | 26 +++++++++++++++++++++++++-
+ 2 files changed, 46 insertions(+), 1 deletion(-)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+<think><details><summary>Thought Process</summary>
+ Oh, I see the issue now — the commit actually added content to CLAUDE.md rather than removing it, which means I must have had it staged for deletion earlier but then scoped the commit to only include the package files, leaving that deletion staged separately.
+
+When I later ran `git commit -- CLAUDE.md`, git committed both the staged deletion and the unstaged new content, which resulted in a net modification rather than a deletion. I need to check the current state and fix this.</details></think>
+
+_**Agent (claude-opus-4-7)**_
+
+That's wrong — `git commit -- CLAUDE.md` re-staged the file content (the generated workflow rule) instead of committing the deletion, because the working tree still had the file present. CLAUDE.md is now tracked again. Need to fix.
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git ls-files CLAUDE.md && echo "---" && git check-ignore -v CLAUDE.md</summary>
+
+```bash
+git ls-files CLAUDE.md && echo "---" && git check-ignore -v CLAUDE.md
+```
+
+```
+CLAUDE.md
+---
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+<think><details><summary>Thought Process</summary>
+ CLAUDE.md is now tracked in the repository and no longer ignored, which means the workflow content from the HEAD commit is active. The safety rules say not to amend if a commit failed, but this one succeeded—it just committed the wrong thing semantically. I need to decide whether to amend or create a follow-up commit to fix this.
+
+Looking at the conditions for amending: the commit was created by me in this conversation, hasn't been pushed, but the user didn't explicitly request an amend and there's no pre-commit auto-modification involved. The stricter interpretation is to reset and redo rather than amend, so I'll use a soft reset to undo the commit while keeping the changes staged, then properly handle removing CLAUDE.md from tracking while preserving it on disk. After a mixed reset, the index reverts to what commit 4 contained, so CLAUDE.md would show as modified in the working tree since the file now has the new content from the rejected commit but the index expects the original. I need to carefully think through what state each file is actually in after the reset to make sure I'm staging only what I intend.
+
+To remove CLAUDE.md from tracking without losing the generated content, I should use `git rm --cached` to stage the deletion, then commit just the staged changes without using a pathspec — that way I'm only committing what's in the index, not trying to add the modified content back.
+
+After the deletion is committed, the file becomes untracked and will be ignored by the new gitignore rule. Let me reset the last commit with a soft reset to keep my working tree changes, then redo this properly by staging only the gitignore and the deletion.</details></think>
+
+_**Agent (claude-opus-4-7)**_
+
+Reset commit 5 and redo correctly. The trick: stage the gitignore, then `git rm --cached` CLAUDE.md, then commit without pathspec so only staged changes go in.
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git reset --soft HEAD~1 && git restore --staged .gitignore CLAUDE.md && git status --short</summary>
+
+```bash
+git reset --soft HEAD~1 && git restore --staged .gitignore CLAUDE.md && git status --short
+```
+
+```
+ M .gitignore
+ M .specstory/statistics.json
+ M CLAUDE.md
+ M docs/PROMPT_HISTORY.md
+?? .claude/
+?? .specstory/history/2026-06-10_11-12-19Z-minimal-rulesync-setup-for-product-development.md
+?? docs/ai/sessions/S002-ai-guardrails.md
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+Index clean now. Stage gitignore and CLAUDE.md deletion explicitly, then commit only what's in the index.
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git add .gitignore && git rm --cached CLAUDE.md && git diff --cached --stat</summary>
+
+```bash
+git add .gitignore && git rm --cached CLAUDE.md && git diff --cached --stat
+```
+
+```
+rm 'CLAUDE.md'
+ .gitignore | 21 +++++++++++++++++++++
+ CLAUDE.md  |  1 -
+ 2 files changed, 21 insertions(+), 1 deletion(-)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+Now the diff shows exactly what we want: `+21` on `.gitignore` and `-1` on `CLAUDE.md` (the single `@AGENTS.md` line being removed).
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git commit -m "$(cat <<'EOF'
+chore(customer-financial-health): ignore rulesync-generated tool files and untrack CLAUDE.md
+
+Appends the rulesync-managed gitignore block (via
+`npm run rulesync -- gitignore --targets cursor,claudecode`) so that
+the generated .cursor/, .claude/ rules/commands/agents/skills,
+.cursorignore, and CLAUDE.md are kept out of version control. The
+previously hand-authored CLAUDE.md (a one-line `@AGENTS.md` redirect)
+is now regenerated by rulesync and is removed from tracking via
+`git rm --cached`; the file remains on disk and is recreated by
+`npm run rulesync -- generate`.
+
+The --targets flag is required when running `rulesync gitignore`:
+without it, rulesync also appends AGENTS.md ignore entries, but this
+repo's AGENTS.md is hand-authored and must stay committed.
+EOF
+)"</summary>
+
+```bash
+git commit -m "$(cat <<'EOF'
+chore(customer-financial-health): ignore rulesync-generated tool files and untrack CLAUDE.md
+
+Appends the rulesync-managed gitignore block (via
+`npm run rulesync -- gitignore --targets cursor,claudecode`) so that
+the generated .cursor/, .claude/ rules/commands/agents/skills,
+.cursorignore, and CLAUDE.md are kept out of version control. The
+previously hand-authored CLAUDE.md (a one-line `@AGENTS.md` redirect)
+is now regenerated by rulesync and is removed from tracking via
+`git rm --cached`; the file remains on disk and is recreated by
+`npm run rulesync -- generate`.
+
+The --targets flag is required when running `rulesync gitignore`:
+without it, rulesync also appends AGENTS.md ignore entries, but this
+repo's AGENTS.md is hand-authored and must stay committed.
+EOF
+)"
+```
+
+```
+[ai-guardrails 70489e0] chore(customer-financial-health): ignore rulesync-generated tool files and untrack CLAUDE.md
+ 2 files changed, 21 insertions(+), 1 deletion(-)
+ delete mode 100644 CLAUDE.md
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+Correct now: `delete mode 100644 CLAUDE.md`. Let me verify.
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git ls-files CLAUDE.md; echo "(empty above means untracked)"; echo "---"; git check-ignore -v CLAUDE.md && echo "---" && ls -la CLAUDE.md</summary>
+
+```bash
+git ls-files CLAUDE.md; echo "(empty above means untracked)"; echo "---"; git check-ignore -v CLAUDE.md && echo "---" && ls -la CLAUDE.md
+```
+
+```
+(empty above means untracked)
+---
+.gitignore:48:**/CLAUDE.md	CLAUDE.md
+---
+-rw-r--r--@ 1 vinayakhegde  staff  2299 Jun 10 12:40 CLAUDE.md
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+Untracked, ignored by `.gitignore:48`, file still present on disk.
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write">
+<details>
+<summary>Tool use: **todo_write**</summary>
+
+
+Parameters:
+
+```json
+{
+  "merge": true
+}
+```
+Result:
+
+```json
+{
+  "finalTodos": [
+    {
+      "content": "Create and switch to ai-guardrails branch",
+      "id": "branch",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: install rulesync + npm script (package.json, package-lock.json)",
+      "id": "c1-install",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: rulesync config + .aiignore",
+      "id": "c2-config",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: gated five-phase workflow rules",
+      "id": "c3-rules",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: phase commands, critic subagent, phase-gate skill",
+      "id": "c4-surface",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: ignore rulesync-generated tool files + untrack CLAUDE.md",
+      "id": "c5-gitignore",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: S002 session docs + raw transcript",
+      "id": "c6-session",
+      "status": "in_progress"
+    }
+  ],
+  "initialTodos": [
+    {
+      "content": "Create and switch to ai-guardrails branch",
+      "id": "branch",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: install rulesync + npm script (package.json, package-lock.json)",
+      "id": "c1-install",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: rulesync config + .aiignore",
+      "id": "c2-config",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: gated five-phase workflow rules",
+      "id": "c3-rules",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: phase commands, critic subagent, phase-gate skill",
+      "id": "c4-surface",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: ignore rulesync-generated tool files + untrack CLAUDE.md",
+      "id": "c5-gitignore",
+      "status": "in_progress"
+    },
+    {
+      "content": "Commit: S002 session docs + raw transcript",
+      "id": "c6-session",
+      "status": "pending"
+    }
+  ],
+  "success": true,
+  "wasMerge": true
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
+<summary>Tool use: **todo_write**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+### Commit 6 — S002 session docs + raw transcript
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git add docs/PROMPT_HISTORY.md docs/ai/sessions/S002-ai-guardrails.md .specstory/history/2026-06-10_11-12-19Z-minimal-rulesync-setup-for-product-development.md .specstory/statistics.json && git diff --cached --stat</summary>
+
+```bash
+git add docs/PROMPT_HISTORY.md docs/ai/sessions/S002-ai-guardrails.md .specstory/history/2026-06-10_11-12-19Z-minimal-rulesync-setup-for-product-development.md .specstory/statistics.json && git diff --cached --stat
+```
+
+```
+ ...nimal-rulesync-setup-for-product-development.md | 3604 ++++++++++++++++++++
+ .specstory/statistics.json                         |    9 +
+ docs/PROMPT_HISTORY.md                             |    1 +
+ docs/ai/sessions/S002-ai-guardrails.md             |   93 +
+ 4 files changed, 3707 insertions(+)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git commit -m "$(cat <<'EOF'
+docs(customer-financial-health): record S002 ai-guardrails session
+
+- docs/ai/sessions/S002-ai-guardrails.md: curated snapshot of the
+  Rulesync scaffolding session (goal, decisions, files changed,
+  commands run, handoff for S003).
+- docs/PROMPT_HISTORY.md: appended S002 row.
+- .specstory/history/2026-06-10_11-12-19Z-...md: raw transcript
+  captured by SpecStory.
+- .specstory/statistics.json: refreshed counters.
+EOF
+)"</summary>
+
+```bash
+git commit -m "$(cat <<'EOF'
+docs(customer-financial-health): record S002 ai-guardrails session
+
+- docs/ai/sessions/S002-ai-guardrails.md: curated snapshot of the
+  Rulesync scaffolding session (goal, decisions, files changed,
+  commands run, handoff for S003).
+- docs/PROMPT_HISTORY.md: appended S002 row.
+- .specstory/history/2026-06-10_11-12-19Z-...md: raw transcript
+  captured by SpecStory.
+- .specstory/statistics.json: refreshed counters.
+EOF
+)"
+```
+
+```
+[ai-guardrails 3f460ae] docs(customer-financial-health): record S002 ai-guardrails session
+ 4 files changed, 3707 insertions(+)
+ create mode 100644 .specstory/history/2026-06-10_11-12-19Z-minimal-rulesync-setup-for-product-development.md
+ create mode 100644 docs/ai/sessions/S002-ai-guardrails.md
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write">
+<details>
+<summary>Tool use: **todo_write**</summary>
+
+
+Parameters:
+
+```json
+{
+  "merge": true
+}
+```
+Result:
+
+```json
+{
+  "finalTodos": [
+    {
+      "content": "Create and switch to ai-guardrails branch",
+      "id": "branch",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: install rulesync + npm script (package.json, package-lock.json)",
+      "id": "c1-install",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: rulesync config + .aiignore",
+      "id": "c2-config",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: gated five-phase workflow rules",
+      "id": "c3-rules",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: phase commands, critic subagent, phase-gate skill",
+      "id": "c4-surface",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: ignore rulesync-generated tool files + untrack CLAUDE.md",
+      "id": "c5-gitignore",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: S002 session docs + raw transcript",
+      "id": "c6-session",
+      "status": "completed"
+    }
+  ],
+  "initialTodos": [
+    {
+      "content": "Create and switch to ai-guardrails branch",
+      "id": "branch",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: install rulesync + npm script (package.json, package-lock.json)",
+      "id": "c1-install",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: rulesync config + .aiignore",
+      "id": "c2-config",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: gated five-phase workflow rules",
+      "id": "c3-rules",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: phase commands, critic subagent, phase-gate skill",
+      "id": "c4-surface",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: ignore rulesync-generated tool files + untrack CLAUDE.md",
+      "id": "c5-gitignore",
+      "status": "completed"
+    },
+    {
+      "content": "Commit: S002 session docs + raw transcript",
+      "id": "c6-session",
+      "status": "in_progress"
+    }
+  ],
+  "success": true,
+  "wasMerge": true
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
+<summary>Tool use: **todo_write**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+Final verification — branch, commit graph, and working tree should be clean (only `.claude/` left, intentionally deferred).
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: git status --short && echo "---" && git log --oneline main..ai-guardrails && echo "---" && git log --pretty=format:'%h %s%n%w(0,4,4)%b' main..ai-guardrails | head -60</summary>
+
+```bash
+git status --short && echo "---" && git log --oneline main..ai-guardrails && echo "---" && git log --pretty=format:'%h %s%n%w(0,4,4)%b' main..ai-guardrails | head -60
+```
+
+```
+?? .claude/
+---
+3f460ae docs(customer-financial-health): record S002 ai-guardrails session
+70489e0 chore(customer-financial-health): ignore rulesync-generated tool files and untrack CLAUDE.md
+ac6ff05 feat(customer-financial-health): add phase commands, critic subagent, and phase-gate skill
+52699ba feat(customer-financial-health): add gated five-phase AI workflow rules
+38b2148 chore(customer-financial-health): configure rulesync for cursor and claudecode targets
+922468e chore(customer-financial-health): install rulesync and add npm script
+---
+3f460ae docs(customer-financial-health): record S002 ai-guardrails session
+    - docs/ai/sessions/S002-ai-guardrails.md: curated snapshot of the
+      Rulesync scaffolding session (goal, decisions, files changed,
+      commands run, handoff for S003).
+    - docs/PROMPT_HISTORY.md: appended S002 row.
+    - .specstory/history/2026-06-10_11-12-19Z-...md: raw transcript
+      captured by SpecStory.
+    - .specstory/statistics.json: refreshed counters.
+
+70489e0 chore(customer-financial-health): ignore rulesync-generated tool files and untrack CLAUDE.md
+    Appends the rulesync-managed gitignore block (via
+    &#96;npm run rulesync -- gitignore --targets cursor,claudecode&#96;) so that
+    the generated .cursor/, .claude/ rules/commands/agents/skills,
+    .cursorignore, and CLAUDE.md are kept out of version control. The
+    previously hand-authored CLAUDE.md (a one-line &#96;@AGENTS.md&#96; redirect)
+    is now regenerated by rulesync and is removed from tracking via
+    &#96;git rm --cached&#96;; the file remains on disk and is recreated by
+    &#96;npm run rulesync -- generate&#96;.
+    
+    The --targets flag is required when running &#96;rulesync gitignore&#96;:
+    without it, rulesync also appends AGENTS.md ignore entries, but this
+    repo's AGENTS.md is hand-authored and must stay committed.
+
+ac6ff05 feat(customer-financial-health): add phase commands, critic subagent, and phase-gate skill
+    User-facing surface for the gated workflow:
+    - Five slash-commands, one per phase: /discovery, /prd, /tech-spec,
+      /test-plan, /implement. Each refuses to proceed if upstream artefacts
+      are missing, and /implement is scoped to a single tech-spec section.
+    - critic subagent: read-only reviewer used between phases; produces a
+      structured critique only, never writes files or code.
+    - phase-gate skill: shared header and traceability-table schema that
+      every phase document follows, so the format stays consistent.
+
+52699ba feat(customer-financial-health): add gated five-phase AI workflow rules
+    Introduces the project's non-negotiable AI process:
+    - 00-workflow.md (root): discovery → PRD → tech spec → test plan →
+      controlled implementation, with a canonical artefact and gate per phase.
+    - 10-evidence.md: anti-fabrication and traceability rules
+      (stable R*/S*/T* IDs, no invented requirements or regulatory citations,
+      no PII or secrets in docs).
+
+38b2148 chore(customer-financial-health): configure rulesync for cursor and claudecode targets
+    Adds rulesync.jsonc targeting only Cursor and Claude Code, with command,
+    subagent, and skill simulation enabled so Cursor sees the full feature
+    set. .rulesync/.aiignore declares deny paths once for all tools.
+
+922468e chore(customer-financial-health): install rulesync and add npm script
+    Adds rulesync@^8.27.0 as a devDependency and exposes it via a single
+    &#96;rulesync&#96; npm script that forwards all arguments to the CLI
+    (&#96;npm run rulesync -- generate&#96;, &#96;npm run rulesync -- gitignore ...&#96;).
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+All clean. Branch `ai-guardrails` is on top of `main` with 6 atomic commits in logical order.
+
+```
+3f460ae  docs   record S002 ai-guardrails session
+70489e0  chore  ignore rulesync-generated tool files and untrack CLAUDE.md
+ac6ff05  feat   add phase commands, critic subagent, and phase-gate skill
+52699ba  feat   add gated five-phase AI workflow rules
+38b2148  chore  configure rulesync for cursor and claudecode targets
+922468e  chore  install rulesync and add npm script
+```
+
+Each commit has one intent. The graph is straightforward to bisect or revert.
+
+### Heads-up: one detour mid-way
+
+I had to reset two of the commits during the session:
+- Commit 1 first picked up the pre-staged `CLAUDE.md` deletion (left over from the earlier `git rm --cached`). Fixed by `git reset --soft HEAD~1` and re-committing with file-scoped pathspec.
+- Commit 5 (`git commit -- CLAUDE.md`) re-tracked the file with its generated content because `git commit -- pathspec` commits both staged AND unstaged changes for that path. Fixed by reset, then `git rm --cached CLAUDE.md` followed by a plain `git commit` (no pathspec) so only the index state was committed.
+
+Both rewrites happened entirely on the local `ai-guardrails` branch — nothing was ever pushed, so no rewrite risk for anyone else.
+
+### One thing still outstanding
+
+- `?? .claude/` shows in `git status` — this is `.claude/settings.json` (the rulesync-generated Claude Code deny list, derived from `.rulesync/.aiignore`). Per rulesync's design it's intended to be team-shared, but you haven't decided yet, so I've left it untracked. Three options:
+  1. `git add .claude/settings.json` and add a small follow-up commit.
+  2. Add `**/.claude/settings.json` to `.gitignore` and commit that as a follow-up if you'd rather not share it.
+  3. Leave as-is — every contributor regenerates their own.
+
+Tell me which and I'll add the commit. Nothing pushed; the branch is local and ready when you are.
+
+---
+
+_**User**_
+
+update @docs/PROMPT_HISTORY.md 
+
+---
+
+_**Agent (claude-opus-4-7)**_
+
+<think><details><summary>Thought Process</summary>
+ I need to update the S002 entry in `docs/PROMPT_HISTORY.md` since it currently shows `(uncommitted)` for the commit hash, but now I have the actual commit hashes to fill in.</details></think>
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/vinayakhegde/source/personal/customer-financial-health/docs/PROMPT_HISTORY.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/vinayakhegde/source/personal/customer-financial-health/docs/PROMPT_HISTORY.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints">
+<details>
+<summary>Tool use: **read_lints**</summary>
+
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "docs/PROMPT_HISTORY.md"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "docs/PROMPT_HISTORY.md"
+    }
+  ]
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+</details></tool-use>
+
+_**Agent (claude-opus-4-7)**_
+
+Updated the S002 row with the actual commit hashes from `ai-guardrails`:
+
+```17:17:docs/PROMPT_HISTORY.md
+| S002 | AI guardrails (Rulesync) | `.specstory/history/2026-06-10_11-12-19Z-minimal-rulesync-setup-for-product-development.md` | `docs/ai/sessions/S002-ai-guardrails.md` | `922468e`, `38b2148`, `52699ba`, `ac6ff05`, `70489e0`, `3f460ae` on `ai-guardrails` | Minimal Rulesync scaffold (2 rules, 5 phase commands, 1 critic subagent, 1 phase-gate skill) targeting Cursor + Claude Code; generated tool files gitignored; CLAUDE.md untracked; no implementation rules yet |
+```
+
+This is now a working-tree change — uncommitted. Once you're ready, the natural follow-up is a small `docs(customer-financial-health): record S002 commit hashes in prompt history` commit. Same pattern S001 used (commit `1140f85`: "record S001 task analysis commit hashes"). Want me to add that commit?
