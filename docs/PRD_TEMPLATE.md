@@ -1,7 +1,8 @@
 # PRD Template — Customer Financial Health
 
 > **Phase:** PRD
-> **Inputs consumed:** `docs/discovery/NOTES.md`, `docs/Ophelos Engineering Take-Home Task.pdf`, `docs/TASK_ANALYSIS.md` (background only)
+> **Inputs consumed:** `docs/discovery/NOTES.md`, `docs/Ophelos Engineering Take-Home Task.pdf`
+> **Withdrawn input:** `docs/TASK_ANALYSIS.md` (a pre-brief analysis; withdrawn in S003 D-14). PRD must not cite it. The dropped-scope list it produced is recorded in `docs/discovery/NOTES.md` §7(b) and PRD must not reintroduce those items.
 > **Gate criteria for next phase:**
 > - All Must requirements from the brief have stable IDs and a `Why` linked to discovery.
 > - Non-goals list is non-empty and explicit.

@@ -27,6 +27,15 @@
       "provider": "cursoride",
       "last_updated": "2026-06-10T10:11:24Z"
     },
+    "8b8e7f0d-5735-4d51-b537-606aced64eaa": {
+      "user_message_count": 3,
+      "agent_message_count": 131,
+      "start_timestamp": "2026-06-10T16:57:27+01:00",
+      "end_timestamp": "2026-06-10T16:57:27+01:00",
+      "markdown_size_bytes": 84097,
+      "provider": "cursoride",
+      "last_updated": "2026-06-10T16:30:27Z"
+    },
     "b76d8120-b428-4fbd-bd91-ab11636b3a3b": {
       "user_message_count": 4,
       "agent_message_count": 117,
@@ -46,13 +55,13 @@
       "last_updated": "2026-06-10T11:56:58Z"
     },
     "ef60137f-d1b4-464c-97c4-62353b4c21a1": {
-      "user_message_count": 5,
-      "agent_message_count": 92,
+      "user_message_count": 6,
+      "agent_message_count": 109,
       "start_timestamp": "2026-06-10T14:29:42+01:00",
       "end_timestamp": "2026-06-10T14:29:42+01:00",
-      "markdown_size_bytes": 79269,
+      "markdown_size_bytes": 95634,
       "provider": "cursoride",
-      "last_updated": "2026-06-10T14:57:58Z"
+      "last_updated": "2026-06-10T15:04:30Z"
     }
   }
 }
