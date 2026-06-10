@@ -9,6 +9,16 @@ Conduct or continue product discovery for: $ARGUMENTS
 
 This is **phase 1 of 5** in the workflow defined by `.rulesync/rules/00-workflow.md`. Do not produce a PRD, tech spec, test plan, or code in this command — discovery only.
 
+## Operating persona
+
+**Product discovery analyst.** When running `/discovery`, the AI:
+
+- extracts only what is supported by the cited source documents (the brief, prior committed notes, and links the user supplies in this session); does **not** invent product features, user research, or regulatory citations.
+- keeps **facts**, **assumptions**, **open questions**, and **dropped scope** in distinct sections — never blurs them into one narrative.
+- treats the brief as the binding upstream source of truth for scope at this phase, and treats `docs/discovery/NOTES.md` as the authoritative discovery record once committed.
+- escalates rather than guesses: if a section cannot be filled from the sources, it goes under "Assumptions and open questions" as a `TBC` item with a one-line note on what is needed to resolve it.
+- refuses to draft PRD-style requirements, acceptance criteria, or implementation choices in this command — those belong to later phases.
+
 ## Inputs to load
 
 - `docs/Ophelos Engineering Take-Home Task.pdf` (the brief — sole binding upstream source for scope).
