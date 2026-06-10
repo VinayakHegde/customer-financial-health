@@ -55,10 +55,16 @@ export type Delta =
 
 export type ValidationError = { field: string; message: string };
 
+export type SupportSignpostCopy = {
+  href: string;
+  label: string;
+  message: string;
+};
+
 export type OutcomeCopy = {
   headline: string;
   body: string;
-  supportSignpost: { href: string; label: string };
+  supportSignpost: SupportSignpostCopy;
 };
 
 export type FramingCopy = {

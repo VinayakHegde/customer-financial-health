@@ -23,6 +23,7 @@ describe("T29 — Tone guard: copy.ts", () => {
         copy.body,
         copy.supportSignpost.label,
         copy.supportSignpost.href,
+        copy.supportSignpost.message,
       ];
 
       for (const text of strings) {
