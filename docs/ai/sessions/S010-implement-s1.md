@@ -7,7 +7,7 @@
 - Model: Claude Opus 4.7 (agent)
 - Branch: `main`
 - Start commit: `fa0bcd3e08086cdc5a5c6534919f2d962d735f15`
-- End commit: (uncommitted — user marked session complete; commit when ready)
+- End commit: `7146d6a` (docs); implementation `73ae42b` on `feat/affordability`
 - Raw transcript: `.specstory/history/2026-06-10_22-23-04Z-s1-implementation.md`
 - Related artefacts: `docs/TECH_SPEC.md` (S1), `docs/TEST_PLAN.md` (T1–T8, T29), `docs/PRD.md` (R1, R5, R6, R8, R9, R10, R20)
 
