@@ -36,6 +36,14 @@ export const adviceImplyingTokens = [
   "you need to",
 ] as const;
 
+/** R20 framing copy guard — excludes "financial advice" (required negation phrase in body). */
+export const framingAdviceForbiddenTokens = [
+  "recommend",
+  "advise",
+  "suggest you",
+  "you should",
+] as const;
+
 /** Combined list for tone-guard tests across copy surfaces. */
 export const forbiddenToneTokens = [
   ...toneTokens,
