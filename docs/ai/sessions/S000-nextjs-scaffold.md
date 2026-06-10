@@ -1,4 +1,4 @@
-# AI Session Snapshot: S001 - Next.js scaffold
+# AI Session Snapshot: S000 - Next.js scaffold
 
 ## Metadata
 
