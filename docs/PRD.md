@@ -91,6 +91,8 @@ The brief states Ophelos is FCA-authorised and that the software has "real oblig
 | R15 | Ship a `DECISIONS.md` at repo root covering what was built, what was left out, what is next, and why. | Must | Submission | brief lines 86–88, 110–111; `NOTES.md` §4, §5 |
 | R16 | Retain and submit the full AI prompt history. | Must | Submission | brief lines 83–85, 108–109; `NOTES.md` §4, §5 |
 | R17 | Record approximate time spent on the task. | Must | Submission | brief lines 93, 112–113; `NOTES.md` §4, §5 |
+| R18 | The customer can use the product with a screen reader and without precise motor input; the specific accessibility standard and conformance level are chosen by tech-spec. | Should | Vulnerability | brief lines 17–19 (FCA fair treatment), 67–68 (appropriate presentation); `NOTES.md` §2 Vulnerable customers ("screen-reader / motor accessibility are baseline expectations, not stretch") |
+| R19 | If any Stretch requirement (R11, R12, R13) is delivered, it is covered by automated tests of the same standard as R4 — protecting real cases, not happy-path-only. | Should | Core | brief line 75 ("Stretch items must be well tested if attempted") |
 
 > No requirements have been dropped in this revision; all IDs above are first-issue. Future revisions must keep IDs append-only and mark removals as `R{n} — DROPPED (reason)` rather than reusing IDs.
 
@@ -114,12 +116,16 @@ The brief states Ophelos is FCA-authorised and that the software has "real oblig
 - **Q1** — Exact numeric thresholds for the surplus / breakeven / shortfall bands (`NOTES.md` §6 OQ-3 left this for PRD).
 - **Q2** — How to present the "no previous snapshot" delta state when the customer submits for the first time (`NOTES.md` §6 OQ-3).
 - **Q3** — How to handle irregular-income input — accept per-month values as-is, or prompt for an averaging window (`NOTES.md` §2 Primary; OQ-3).
+- **Q4** — What snapshot retention period applies? (`NOTES.md` §5 names UK GDPR storage limitation but does not pin a value; §3 paraphrases it but §6 does not address retention.)
+- **Q5** — How does the customer correct a snapshot containing an input mistake, given snapshots are immutable (R2)?
 
 **Working assumptions** (adopted if questions remain open):
 
 - **A1** — Default band thresholds: **surplus** when disposable income (DI) > 0; **breakeven** when DI = 0; **shortfall** when DI < 0. A "near-breakeven" band may be added by tech-spec / implementation if a small-positive DI feels misleadingly celebrated. Income = 0 (R5 case a) routes to the shortfall outcome unless expenditure is also 0, in which case it routes to the no-data state (R5 case c).
 - **A2** — On the first snapshot, the delta state shows a friendly placeholder ("This is your first snapshot — we'll show how your position changes once you submit again") rather than a numeric delta or an empty cell.
 - **A3** — Irregular-income inputs are accepted at the per-month value the customer enters; we display a small note that "income may vary month-to-month" on the affordability surface but do not force an averaging-window UI in MVP.
+- **A4** — Snapshots are retained for the lifetime of the customer record in this take-home; production retention rules are out of scope and consistent with N8 (independent verification of FCA / GDPR citations out of scope). Tech-spec / implementation revisit only if a Stretch (R11–R13) later forces the question.
+- **A5** — Corrections are made by submitting a new snapshot; previous snapshots remain visible and are not edited, hidden, or deleted. The next snapshot's delta (R2) vs an incorrect prior snapshot may read unusually large; tech-spec / implementation choose whether to surface a "this looks like a correction" affordance.
 
 ---
 
@@ -140,5 +146,7 @@ The brief states Ophelos is FCA-authorised and that the software has "real oblig
 | Stretch: time-limited secure statement-share link (brief line 73) | R12 | Could; outside MVP unless time. |
 | Stretch: branded PDF export (brief line 74) | R13 | Could; outside MVP unless time. |
 | Submission artefacts (brief lines 76–113; `NOTES.md` §4, §5) | R14, R15, R16, R17 | First-class deliverables, not scaffolding. |
+| Accessibility baseline — screen-reader and motor accessibility (`NOTES.md` §2 Vulnerable customers) | R18 | Should; the specific accessibility standard and conformance level are chosen by tech-spec. |
+| Brief line 75 — "Stretch items must be well tested if attempted" | R19 | Should; conditional on any of R11, R12, R13 being delivered. Extends R4's discipline to delivered stretches without editing R4. |
 | OQ-1 resolution — pre-brief arrangement-journey scope dropped; `docs/TASK_ANALYSIS.md` withdrawn (`NOTES.md` §6 OQ-1, §7(b)) | n/a — closed at discovery | Reflected in N2 / N3 / N4 (Section 5); no requirement in this PRD reintroduces dropped scope. |
 | FCA / GDPR paraphrases owned by `NOTES.md`, labelled "not independently verified" (`NOTES.md` §6 OQ-7) | n/a — housekeeping | Section 3 inherits the labels; reflected as N8. |
