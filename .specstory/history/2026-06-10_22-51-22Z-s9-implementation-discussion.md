@@ -1944,3 +1944,508 @@ _**Agent (default)**_
 <summary>Tool use: **edit_file_v2**</summary>
 
 </details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && npm test -- tests/s9/ && npm run lint && npm run typecheck 2>&1</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && npm test -- tests/s9/ && npm run lint && npm run typecheck 2>&1
+```
+
+```
+
+&gt; customer-financial-health@0.1.0 test
+&gt; vitest run tests/s9/
+
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.8 /Users/vinayakhegde/source/personal/customer-financial-health
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+
+ Test Files  2 passed (2)
+      Tests  2 passed (2)
+   Start at  23:56:13
+   Duration  519ms (transform 40ms, setup 44ms, import 133ms, tests 63ms, environment 471ms)
+
+
+&gt; customer-financial-health@0.1.0 lint
+&gt; biome check
+
+Checked 59 files in 5ms. No fixes applied.
+
+&gt; customer-financial-health@0.1.0 typecheck
+&gt; tsc --noEmit
+
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+Applied all three critic follow-ups:
+
+### 1. T32 — stronger a11y assertions
+- Verifies `aria-labelledby` is set and matches the `<h2>` `id`
+- Asserts headline and body copy render in the DOM (not just accessible names)
+
+### 2. T43 — aligned with TECH_SPEC S9
+- Comment explains why `framingAdviceForbiddenTokens` is used instead of the full `adviceImplyingTokens` list
+- Token scan now includes `supportLink.href`
+
+### 3. S013 snapshot — known test limits documented
+- **D-73** records that R9 and SC 2.5.8 are not directly asserted (axe + CSS only)
+- Deviations table updated for R9 and SC 2.5.8
+
+All S9 tests, lint, and typecheck pass.
+
+---
+
+_**User**_
+
+S013 completed
+
+---
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+Session S013 is complete.</details></think>
+
+_**Agent (default)**_
+
+Finalizing the S013 session snapshot and prompt history for handoff.
+
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/vinayakhegde/source/personal/customer-financial-health/docs/ai/sessions/S013-implement-s9.md</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search">
+<details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/Users/vinayakhegde/source/personal/customer-financial-health/docs/PROMPT_HISTORY.md",
+  "pattern": "S013"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/Users/vinayakhegde/source/personal/customer-financial-health/docs/PROMPT_HISTORY.md",
+  "pattern": "S013",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "docs/PROMPT_HISTORY.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 1
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && npm test 2>&1 | tail -8</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && npm test 2>&1 | tail -8
+```
+
+```
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+
+ Test Files  20 passed (20)
+      Tests  58 passed (58)
+   Start at  23:56:37
+   Duration  1.57s (transform 564ms, setup 456ms, import 3.78s, tests 871ms, environment 9.73s)
+
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/vinayakhegde/source/personal/customer-financial-health/docs/ai/sessions/S013-implement-s9.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/vinayakhegde/source/personal/customer-financial-health/docs/ai/sessions/S013-implement-s9.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: /Users/vinayakhegde/source/personal/customer-financial-health/docs/PROMPT_HISTORY.md</summary>
+
+</details>
+
+</tool-use>
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+**S013 closed.**
+
+Session snapshot and `docs/PROMPT_HISTORY.md` are updated. Delivered:
+
+- `components/FramingNotice.tsx`
+- **T43** + **T32** (58 tests green)
+- Critic follow-ups applied (D-71–D-73)
+
+Changes remain **uncommitted** on `main`.
+
+**Next session prompt:**
+
+> S014 `/implement S4` — `<DashboardView />` + dashboard route; tests T21–T23, T28 (dashboard half).
+
+---
+
+_**User**_
+
+/ac in a new feature branch
+
+---
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+Creating atomic commits in a new feature branch.</details></think>
+
+_**Agent (default)**_
+
+Inspecting changes and grouping them into atomic commits on a new feature branch.
+
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git status && echo '---' && git diff --stat && echo '---' && git log -5 --oneline</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git status && echo '---' && git diff --stat && echo '---' && git log -5 --oneline
+```
+
+```
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add &lt;file&gt;..." to update what will be committed)
+  (use "git restore &lt;file&gt;..." to discard changes in working directory)
+	modified:   .specstory/statistics.json
+	modified:   docs/PROMPT_HISTORY.md
+	modified:   tests/_helpers/forbiddenToneTokens.ts
+
+Untracked files:
+  (use "git add &lt;file&gt;..." to include in what will be committed)
+	.specstory/history/2026-06-10_22-51-22Z-s9-implementation-discussion.md
+	components/
+	docs/ai/sessions/S013-implement-s9.md
+	tests/s9/
+
+no changes added to commit (use "git add" and/or "git commit -a")
+---
+ .specstory/statistics.json            | 9 +++++++++
+ docs/PROMPT_HISTORY.md                | 1 +
+ tests/_helpers/forbiddenToneTokens.ts | 8 ++++++++
+ 3 files changed, 18 insertions(+)
+---
+c1ab6ed Merge pull request #16 from VinayakHegde/feat/s3-persona-auth
+1930255 chore(customer-financial-health): capture S012 SpecStory transcript
+a9a401d docs(customer-financial-health): record S012 S3 implementation session
+3080a23 feat(customer-financial-health): implement S3 persona cookie auth and DB seeding
+f929b44 Merge pull request #15 from VinayakHegde/feat/s2-persistence
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+Reviewing recent S012 commits to match the existing structure.</details></think>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git diff tests/_helpers/forbiddenToneTokens.ts && echo '=== PROMPT ===' && git diff docs/PROMPT_HISTORY.md</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git diff tests/_helpers/forbiddenToneTokens.ts && echo '=== PROMPT ===' && git diff docs/PROMPT_HISTORY.md
+```
+
+```
+diff --git a/tests/_helpers/forbiddenToneTokens.ts b/tests/_helpers/forbiddenToneTokens.ts
+index ef95aad..d377f0c 100644
+--- a/tests/_helpers/forbiddenToneTokens.ts
++++ b/tests/_helpers/forbiddenToneTokens.ts
+@@ -36,6 +36,14 @@ export const adviceImplyingTokens = [
+   "you need to",
+ ] as const;
+ 
++/** R20 framing copy guard — excludes "financial advice" (required negation phrase in body). */
++export const framingAdviceForbiddenTokens = [
++  "recommend",
++  "advise",
++  "suggest you",
++  "you should",
++] as const;
++
+ /** Combined list for tone-guard tests across copy surfaces. */
+ export const forbiddenToneTokens = [
+   ...toneTokens,
+=== PROMPT ===
+diff --git a/docs/PROMPT_HISTORY.md b/docs/PROMPT_HISTORY.md
+index 033be96..9b63e96 100644
+--- a/docs/PROMPT_HISTORY.md
++++ b/docs/PROMPT_HISTORY.md
+@@ -25,3 +25,4 @@ Curated session snapshots are stored in:
+ | S010 | &#96;/implement S1&#96; — Affordability domain (pure) | &#96;.specstory/history/&#96; (SpecStory on window close) | &#96;docs/ai/sessions/S010-implement-s1.md&#96; | &#96;5847307&#96; (merged PR #13) | **Complete.** S1 shipped: &#96;lib/affordability/&#96; (types, calculator, validation, copy, framing), &#96;lib/personas.ts&#96; for T8, synthetic fixtures in &#96;tests/_fixtures/ie.ts&#96;; **T1–T8, T29 pass** (30 new tests, 37 total). Added &#96;zod&#96;. D-62: personas in S1 for T8 before S3. D-63: &#96;variable?: boolean&#96; on earners. Handoff: **&#96;/implement S2&#96;**. Decisions D-62 → D-64. |
+ | S011 | &#96;/implement S2&#96; — Persistence layer (SQLite + Drizzle) | &#96;.specstory/history/&#96; (SpecStory on window close) | &#96;docs/ai/sessions/S011-implement-s2.md&#96; | (uncommitted) on &#96;main&#96; | **Complete.** S2 shipped: &#96;lib/db/&#96; (schema, client, migrate, snapshots), committed &#96;drizzle/&#96; migration, &#96;makeDb()&#96; wired to production path; **T9–T12 pass** (41 tests total). Added &#96;drizzle-kit&#96;. D-65: &#96;rowid&#96; ordering tiebreaker. D-66: &#96;reasons&#96; rebuilt via &#96;assess(ie)&#96; on read. Handoff: **&#96;/implement S3&#96;**. Decisions D-65 → D-66. |
+ | S012 | &#96;/implement S3&#96; — Persona fixtures + cookie mock auth | &#96;.specstory/history/&#96; (SpecStory on window close) | &#96;docs/ai/sessions/S012-implement-s3.md&#96; | (uncommitted) on &#96;main&#96; | **Complete.** S3 shipped: &#96;lib/identity/persona-cookie.ts&#96; (&#96;getPersonaId&#96; / &#96;setPersonaId&#96;), &#96;lib/db/seed.ts&#96; + seed-on-first-open, **T13–T14 + seed integration pass** (56 tests total). D-67–D-70. Middleware redirect deferred to S4/S8 (documented in session). Handoff: **&#96;/implement S9&#96;**. |
++| S013 | &#96;/implement S9&#96; — Reflection-not-advice framing | &#96;.specstory/history/&#96; (SpecStory on window close) | &#96;docs/ai/sessions/S013-implement-s9.md&#96; | (uncommitted) on &#96;main&#96; | **Closed.** S9 shipped: &#96;components/FramingNotice.tsx&#96; (uses existing &#96;lib/affordability/framing.ts&#96; from S1), **T43 + T32 pass** (58 tests total). D-71–D-73. &#96;@critic&#96; Minor fixes applied (T32 labelledby wiring, T43 href scan + spec comment, known R9/SC 2.5.8 limits). Handoff: **&#96;/implement S4&#96;**. |
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/vinayakhegde/source/personal/customer-financial-health/package.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+Examining the S012 commit pattern.</details></think>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git checkout -b feat/s9-framing-notice</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git checkout -b feat/s9-framing-notice
+```
+
+```
+Switched to a new branch 'feat/s9-framing-notice'
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git add components/FramingNotice.tsx tests/s9/ tests/_helpers/forbiddenToneTokens.ts && git commit -m "$(cat <<'EOF'
+feat(customer-financial-health): implement S9 FramingNotice and framing guard tests
+
+Add the reflection-not-advice presentational component and T43/T32 tests
+so S4 and S6 can embed FramingNotice on outcome screens per R20.
+EOF
+)"</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git add components/FramingNotice.tsx tests/s9/ tests/_helpers/forbiddenToneTokens.ts && git commit -m "$(cat <<'EOF'
+feat(customer-financial-health): implement S9 FramingNotice and framing guard tests
+
+Add the reflection-not-advice presentational component and T43/T32 tests
+so S4 and S6 can embed FramingNotice on outcome screens per R20.
+EOF
+)"
+```
+
+```
+[feat/s9-framing-notice 37f92e7] feat(customer-financial-health): implement S9 FramingNotice and framing guard tests
+ 4 files changed, 104 insertions(+)
+ create mode 100644 components/FramingNotice.tsx
+ create mode 100644 tests/s9/t32-framing-notice.test.tsx
+ create mode 100644 tests/s9/t43-framing-copy-guard.test.ts
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git add docs/ai/sessions/S013-implement-s9.md docs/PROMPT_HISTORY.md && git commit -m "$(cat <<'EOF'
+docs(customer-financial-health): record S013 S9 implementation session
+
+Capture scope, decisions D-71–D-73, critic follow-up, and handoff to S4.
+EOF
+)"</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git add docs/ai/sessions/S013-implement-s9.md docs/PROMPT_HISTORY.md && git commit -m "$(cat <<'EOF'
+docs(customer-financial-health): record S013 S9 implementation session
+
+Capture scope, decisions D-71–D-73, critic follow-up, and handoff to S4.
+EOF
+)"
+```
+
+```
+[feat/s9-framing-notice b95cca4] docs(customer-financial-health): record S013 S9 implementation session
+ 2 files changed, 70 insertions(+)
+ create mode 100644 docs/ai/sessions/S013-implement-s9.md
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git add .specstory/statistics.json .specstory/history/2026-06-10_22-51-22Z-s9-implementation-discussion.md && git commit -m "$(cat <<'EOF'
+chore(customer-financial-health): capture S013 SpecStory transcript
+EOF
+)" && git status && git log -3 --oneline</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git add .specstory/statistics.json .specstory/history/2026-06-10_22-51-22Z-s9-implementation-discussion.md && git commit -m "$(cat <<'EOF'
+chore(customer-financial-health): capture S013 SpecStory transcript
+EOF
+)" && git status && git log -3 --oneline
+```
+
+```
+[feat/s9-framing-notice b6494b4] chore(customer-financial-health): capture S013 SpecStory transcript
+ 2 files changed, 1955 insertions(+)
+ create mode 100644 .specstory/history/2026-06-10_22-51-22Z-s9-implementation-discussion.md
+On branch feat/s9-framing-notice
+nothing to commit, working tree clean
+b6494b4 chore(customer-financial-health): capture S013 SpecStory transcript
+b95cca4 docs(customer-financial-health): record S013 S9 implementation session
+37f92e7 feat(customer-financial-health): implement S9 FramingNotice and framing guard tests
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+**Branch:** `feat/s9-framing-notice` (3 atomic commits, clean working tree)
+
+| Commit | Message |
+|--------|---------|
+| `37f92e7` | `feat(customer-financial-health): implement S9 FramingNotice and framing guard tests` |
+| `b95cca4` | `docs(customer-financial-health): record S013 S9 implementation session` |
+| `b6494b4` | `chore(customer-financial-health): capture S013 SpecStory transcript` |
+
+Implementation and tests are in the first commit; session docs and SpecStory artefacts are split out separately, matching the S012 pattern.
+
+Say if you want this pushed or opened as a PR.
