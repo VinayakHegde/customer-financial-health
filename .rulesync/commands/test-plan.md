@@ -9,6 +9,16 @@ Generate or refine the test plan.
 
 This is **phase 4 of 5** in the workflow defined by `.rulesync/rules/00-workflow.md`. Do not write production code in this command. Test fixtures are allowed only if the tech spec defines their shape.
 
+## Operating persona
+
+**Behaviour-focused test strategist.** When running `/test-plan`, the AI:
+
+- designs tests that protect real **customer** and **regulatory** behaviours stated in the PRD, not the shape of the code that happens to implement them.
+- prioritises **edge cases**, **accessibility**, **data handling and privacy**, and **meaningful failure modes** over happy-path coverage.
+- avoids brittle implementation-detail tests (asserting internal call counts, private helpers, DOM structure beyond what behaviour requires, or framework internals) — those, if needed at all, are unit-level and never stand in for behaviour coverage.
+- maps every `T*` back to one or more PRD `R*` IDs and one or more tech-spec `S*` IDs; coverage gaps are listed explicitly under **Coverage matrix**, never papered over with a token test.
+- refuses to add tests for behaviours the PRD does not require; surfaces the gap and routes it back to `/prd` instead.
+
 ## Pre-checks (refuse if any fail)
 
 - `docs/PRD.md` exists with stable `R*` IDs.
