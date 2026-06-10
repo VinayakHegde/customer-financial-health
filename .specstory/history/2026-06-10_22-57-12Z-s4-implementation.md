@@ -4203,3 +4203,255 @@ _**Agent (default)**_
 **Delivered:** S4 affordability dashboard — `<DashboardView />`, `<SupportSignpost />`, `/dashboard` page, `computeDelta`, and tests T21–T23, T33, T34, T22, T28 (dashboard half), T44, T45 (91 tests green after critic follow-up).
 
 **Next session:** S015 `/implement S5` — update form, server action, and tests T18–T20, T24–T25, T35–T38, T36.
+
+---
+
+_**User**_
+
+/ac in a new feature branch
+
+---
+
+_**Agent (default)**_
+
+Inspecting changes and grouping them into atomic commits on a new feature branch.
+
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git status && git diff --stat && git log -5 --oneline</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git status && git diff --stat && git log -5 --oneline
+```
+
+```
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add &lt;file&gt;..." to update what will be committed)
+  (use "git restore &lt;file&gt;..." to discard changes in working directory)
+	modified:   .specstory/statistics.json
+	modified:   docs/PROMPT_HISTORY.md
+	modified:   lib/affordability/copy.ts
+	modified:   lib/affordability/types.ts
+	modified:   tests/s1/t29-tone-guard.test.ts
+
+Untracked files:
+  (use "git add &lt;file&gt;..." to include in what will be committed)
+	.specstory/history/2026-06-10_22-57-12Z-s4-implementation.md
+	components/DashboardView.tsx
+	components/SupportSignpost.tsx
+	docs/ai/sessions/S014-implement-s4.md
+	lib/dashboard/
+	src/app/dashboard/
+	tests/_fixtures/delta.ts
+	tests/_fixtures/snapshots.ts
+	tests/_helpers/buildDashboardProps.ts
+	tests/s4/
+
+no changes added to commit (use "git add" and/or "git commit -a")
+ .specstory/statistics.json      |  9 +++++++++
+ docs/PROMPT_HISTORY.md          |  3 ++-
+ lib/affordability/copy.ts       | 33 ++++++++++++++++++++++++---------
+ lib/affordability/types.ts      |  8 +++++++-
+ tests/s1/t29-tone-guard.test.ts |  1 +
+ 5 files changed, 43 insertions(+), 11 deletions(-)
+591ff1c Merge pull request #17 from VinayakHegde/feat/s9-framing-notice
+1e94613 prompt history
+b6494b4 chore(customer-financial-health): capture S013 SpecStory transcript
+b95cca4 docs(customer-financial-health): record S013 S9 implementation session
+37f92e7 feat(customer-financial-health): implement S9 FramingNotice and framing guard tests
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: /Users/vinayakhegde/source/personal/customer-financial-health/package.json</summary>
+
+</details>
+</tool-use>
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+I'll organize atomic commits for the new feature branch.
+
+The S4 feature splits into six atomic commits. Implementation covers domain copy, computeDelta, and dashboard components. Tests and fixtures follow. Session docs and prompt history come last.
+
+The six commits map to specific files. Copy and type changes go first. ComputeDelta follows. Dashboard components and page come next. Tests and fixtures come after. Session docs and prompt history come last. Optional specstory files may be skipped.
+
+Reconsidering the commit structure. The S013 pattern suggests combining logic and tests into a single feat commit, with docs and specstory as separate entries. This keeps the implementation and its validation together.
+
+The commit structure is now settled. One feat commit will bundle all code and tests. A docs commit will record the S014 session. A chore commit will capture the SpecStory transcript. The alternative of splitting code into smaller atomic commits was rejected.</details></think>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git checkout -b feat/s4-dashboard</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git checkout -b feat/s4-dashboard
+```
+
+```
+Switched to a new branch 'feat/s4-dashboard'
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git add \
+  lib/affordability/copy.ts \
+  lib/affordability/types.ts \
+  lib/dashboard/ \
+  components/DashboardView.tsx \
+  components/SupportSignpost.tsx \
+  src/app/dashboard/ \
+  tests/_fixtures/delta.ts \
+  tests/_fixtures/snapshots.ts \
+  tests/_helpers/buildDashboardProps.ts \
+  tests/s4/ \
+  tests/s1/t29-tone-guard.test.ts && git commit -m "$(cat <<'EOF'
+feat(customer-financial-health): implement S4 dashboard affordability surface
+
+Add DashboardView, SupportSignpost, and the /dashboard page with delta
+computation. Extend signpost copy variants per outcome state and ship
+matching tests T21–T23, T33, T34, T22, T28, T44, T45 plus computeDelta
+and R6 disposable-sign coverage.
+
+EOF
+)"</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git add \
+  lib/affordability/copy.ts \
+  lib/affordability/types.ts \
+  lib/dashboard/ \
+  components/DashboardView.tsx \
+  components/SupportSignpost.tsx \
+  src/app/dashboard/ \
+  tests/_fixtures/delta.ts \
+  tests/_fixtures/snapshots.ts \
+  tests/_helpers/buildDashboardProps.ts \
+  tests/s4/ \
+  tests/s1/t29-tone-guard.test.ts && git commit -m "$(cat <<'EOF'
+feat(customer-financial-health): implement S4 dashboard affordability surface
+
+Add DashboardView, SupportSignpost, and the /dashboard page with delta
+computation. Extend signpost copy variants per outcome state and ship
+matching tests T21–T23, T33, T34, T22, T28, T44, T45 plus computeDelta
+and R6 disposable-sign coverage.
+
+EOF
+)"
+```
+
+```
+[feat/s4-dashboard c438b18] feat(customer-financial-health): implement S4 dashboard affordability surface
+ 20 files changed, 886 insertions(+), 10 deletions(-)
+ create mode 100644 components/DashboardView.tsx
+ create mode 100644 components/SupportSignpost.tsx
+ create mode 100644 lib/dashboard/computeDelta.ts
+ create mode 100644 src/app/dashboard/page.tsx
+ create mode 100644 tests/_fixtures/delta.ts
+ create mode 100644 tests/_fixtures/snapshots.ts
+ create mode 100644 tests/_helpers/buildDashboardProps.ts
+ create mode 100644 tests/s4/compute-delta.test.ts
+ create mode 100644 tests/s4/t21-dashboard-outcome-states.test.tsx
+ create mode 100644 tests/s4/t21-disposable-sign-indicator.test.tsx
+ create mode 100644 tests/s4/t22-signpost-ubiquity.test.tsx
+ create mode 100644 tests/s4/t23-first-snapshot-delta.test.tsx
+ create mode 100644 tests/s4/t28-framing-ubiquity-dashboard.test.tsx
+ create mode 100644 tests/s4/t33-delta-change.test.tsx
+ create mode 100644 tests/s4/t34-dashboard-a11y.test.tsx
+ create mode 100644 tests/s4/t44-support-signpost-a11y.test.tsx
+ create mode 100644 tests/s4/t45-signpost-copy-variant.test.tsx
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git add docs/ai/sessions/S014-implement-s4.md docs/PROMPT_HISTORY.md && git commit -m "$(cat <<'EOF'
+docs(customer-financial-health): record S014 S4 implementation session
+
+EOF
+)" && git add .specstory/statistics.json .specstory/history/2026-06-10_22-57-12Z-s4-implementation.md && git commit -m "$(cat <<'EOF'
+chore(customer-financial-health): capture S014 SpecStory transcript
+
+EOF
+)" && git status</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git add docs/ai/sessions/S014-implement-s4.md docs/PROMPT_HISTORY.md && git commit -m "$(cat <<'EOF'
+docs(customer-financial-health): record S014 S4 implementation session
+
+EOF
+)" && git add .specstory/statistics.json .specstory/history/2026-06-10_22-57-12Z-s4-implementation.md && git commit -m "$(cat <<'EOF'
+chore(customer-financial-health): capture S014 SpecStory transcript
+
+EOF
+)" && git status
+```
+
+```
+[feat/s4-dashboard 081a288] docs(customer-financial-health): record S014 S4 implementation session
+ 2 files changed, 84 insertions(+), 1 deletion(-)
+ create mode 100644 docs/ai/sessions/S014-implement-s4.md
+[feat/s4-dashboard 05b49b4] chore(customer-financial-health): capture S014 SpecStory transcript
+ 2 files changed, 4214 insertions(+)
+ create mode 100644 .specstory/history/2026-06-10_22-57-12Z-s4-implementation.md
+On branch feat/s4-dashboard
+nothing to commit, working tree clean
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+S4 is on branch `feat/s4-dashboard` as three atomic commits:
+
+| Commit | Message |
+|---|---|
+| `c438b18` | `feat(customer-financial-health): implement S4 dashboard affordability surface` |
+| `081a288` | `docs(customer-financial-health): record S014 S4 implementation session` |
+| `05b49b4` | `chore(customer-financial-health): capture S014 SpecStory transcript` |
+
+Working tree is clean. Push and open a PR when you're ready.
