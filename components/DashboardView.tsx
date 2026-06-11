@@ -20,6 +20,7 @@ import type {
   OutcomeCopy,
 } from "../lib/affordability/types";
 import { personaFirstName } from "../lib/personas";
+import { DownloadPdfLink } from "./DownloadPdfLink";
 import { FramingNotice } from "./FramingNotice";
 import { ShareSnapshotForm } from "./ShareSnapshotForm";
 import { SupportSignpost } from "./SupportSignpost";
@@ -248,12 +249,22 @@ export function DashboardView({
           Hello,{" "}
           <span className="font-medium text-foreground">{firstName}</span>.
         </p>
-        <h1
-          id={SNAPSHOT_HEADING_ID}
-          className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
-        >
-          {copy.headline}
-        </h1>
+        {/* Headline + Download PDF on the same row. `items-start` keeps the
+            button anchored to the top of the headline area so it doesn't
+            visually drift down if the headline ever wraps to two lines.
+            Button only renders when a snapshot exists (no-data state has
+            nothing to export). */}
+        <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
+          <h1
+            id={SNAPSHOT_HEADING_ID}
+            className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
+          >
+            {copy.headline}
+          </h1>
+          {latestSnapshotId !== null && (
+            <DownloadPdfLink snapshotId={latestSnapshotId} />
+          )}
+        </div>
 
         {showFinancialSummary && (
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -298,13 +309,22 @@ export function DashboardView({
           </p>
         )}
 
+        {latestSnapshotId !== null && (
+          <div className="mt-6">
+            <ShareSnapshotForm snapshotId={latestSnapshotId} />
+          </div>
+        )}
+
         <nav
           aria-label="Dashboard actions"
           className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end"
         >
           {/* New-customer (no-data) state: "View past submissions" hidden
               because there are none, and the primary CTA reads "Add" instead
-              of "Update" because the customer has no prior I&E to update. */}
+              of "Update" because the customer has no prior I&E to update.
+              Download PDF lives next to the headline above (when a snapshot
+              exists); Share lives in its own block between the metrics and
+              this nav. */}
           {!showFinancialSummary ? null : (
             <a
               href="/history"
@@ -368,12 +388,6 @@ export function DashboardView({
           </div>
         </section>
       </div>
-
-      {latestSnapshotId !== null && (
-        <div className="mt-6">
-          <ShareSnapshotForm snapshotId={latestSnapshotId} />
-        </div>
-      )}
 
       <div className="mt-6">
         <SupportSignpost state={outcome.state} />

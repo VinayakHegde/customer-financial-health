@@ -2,6 +2,7 @@ import { CalendarDays, ClipboardList, PencilLine, Wallet } from "lucide-react";
 import { formatMoney } from "../lib/affordability/format";
 import type { Band, OutcomeState, Snapshot } from "../lib/affordability/types";
 import { BackToDashboardLink } from "./BackToDashboardLink";
+import { DownloadPdfLink } from "./DownloadPdfLink";
 import { FramingNotice } from "./FramingNotice";
 import { ShareSnapshotForm } from "./ShareSnapshotForm";
 import { SupportSignpost } from "./SupportSignpost";
@@ -231,12 +232,21 @@ function SnapshotRow({ snapshot, now }: { snapshot: Snapshot; now: Date }) {
         )}
       </div>
 
-      <details className="mt-4 sm:pl-3">
-        <summary className="inline-flex min-h-6 min-w-6 cursor-pointer items-center gap-1.5 rounded-md text-sm font-medium text-foreground underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring">
-          Show what was submitted on {formattedDate}
-        </summary>
-        <IeBreakdown snapshot={snapshot} />
-      </details>
+      {/* Disclosure + Download pair: the disclosure previews the snapshot
+          contents inline; Download PDF saves the same contents as a file.
+          Both are "personal-consumption" actions, distinct from the
+          third-party outbound action below (Share). Items anchor to the top
+          so the button stays aligned to the summary row when the disclosure
+          expands. */}
+      <div className="mt-4 flex flex-wrap items-start justify-between gap-3 sm:pl-3">
+        <details className="grow">
+          <summary className="inline-flex min-h-6 min-w-6 cursor-pointer items-center gap-1.5 rounded-md text-sm font-medium text-foreground underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring">
+            Show what was submitted on {formattedDate}
+          </summary>
+          <IeBreakdown snapshot={snapshot} />
+        </details>
+        <DownloadPdfLink snapshotId={snapshot.id} />
+      </div>
 
       <div className="mt-4 sm:pl-3">
         <ShareSnapshotForm snapshotId={snapshot.id} />
