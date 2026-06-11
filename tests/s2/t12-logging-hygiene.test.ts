@@ -3,15 +3,15 @@ import { assess } from "../../lib/affordability/calculator";
 import { ieJordanShortfall } from "../_fixtures/ie";
 import { makeDb } from "../_helpers";
 
+const consoleMethods = ["log", "info", "debug", "warn", "error"] as const;
+
 describe("T12 — DB logging hygiene", () => {
-  let logSpy: ReturnType<typeof vi.spyOn>;
+  let consoleSpies: ReturnType<typeof vi.spyOn>[];
 
   beforeEach(() => {
-    logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-    vi.spyOn(console, "info").mockImplementation(() => {});
-    vi.spyOn(console, "debug").mockImplementation(() => {});
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-    vi.spyOn(console, "error").mockImplementation(() => {});
+    consoleSpies = consoleMethods.map((method) =>
+      vi.spyOn(console, method).mockImplementation(() => {}),
+    );
   });
 
   afterEach(() => {
@@ -32,7 +32,8 @@ describe("T12 — DB logging hygiene", () => {
       outcome: assess(ieJordanShortfall),
     });
 
-    const logged = logSpy.mock.calls
+    const logged = consoleSpies
+      .flatMap((spy) => spy.mock.calls)
       .flat()
       .filter((arg: unknown): arg is string => typeof arg === "string")
       .join("\n");
