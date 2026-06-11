@@ -1,5 +1,5 @@
 import { CalendarDays, ClipboardList, PencilLine, Wallet } from "lucide-react";
-import { formatPounds } from "../lib/affordability/format";
+import { formatMoney } from "../lib/affordability/format";
 import type { Band, OutcomeState, Snapshot } from "../lib/affordability/types";
 import { BackToDashboardLink } from "./BackToDashboardLink";
 import { FramingNotice } from "./FramingNotice";
@@ -12,14 +12,14 @@ export type HistoryListProps = {
 
 const PAGE_TITLE_ID = "history-page-title";
 
-function formatSignedDisposable(pence: number): string {
+function formatSignedDisposable(pence: number, snapshot: Snapshot): string {
   if (pence > 0) {
-    return `+${formatPounds(pence)}`;
+    return `+${formatMoney(pence, snapshot.currency, snapshot.countryCode)}`;
   }
   if (pence < 0) {
-    return `−${formatPounds(Math.abs(pence))}`;
+    return `−${formatMoney(Math.abs(pence), snapshot.currency, snapshot.countryCode)}`;
   }
-  return formatPounds(0);
+  return formatMoney(0, snapshot.currency, snapshot.countryCode);
 }
 
 function formatSnapshotDate(iso: string): string {
@@ -115,7 +115,11 @@ function IeBreakdown({ snapshot }: { snapshot: Snapshot }) {
               >
                 <dt className="text-sm text-foreground">{earner.label}</dt>
                 <dd className="text-sm font-medium tabular-nums sm:text-right">
-                  {formatPounds(earner.amountPence)}
+                  {formatMoney(
+                    earner.amountPence,
+                    snapshot.currency,
+                    snapshot.countryCode,
+                  )}
                 </dd>
               </div>
             ))}
@@ -147,7 +151,11 @@ function IeBreakdown({ snapshot }: { snapshot: Snapshot }) {
               >
                 <dt className="text-sm text-foreground">{line.label}</dt>
                 <dd className="text-sm font-medium tabular-nums sm:text-right">
-                  {formatPounds(line.amountPence)}
+                  {formatMoney(
+                    line.amountPence,
+                    snapshot.currency,
+                    snapshot.countryCode,
+                  )}
                 </dd>
               </div>
             ))}
@@ -208,7 +216,7 @@ function SnapshotRow({ snapshot, now }: { snapshot: Snapshot; now: Date }) {
           >
             Disposable income:{" "}
             <span className="font-semibold tabular-nums">
-              {formatSignedDisposable(outcome.disposableIncomePence)}
+              {formatSignedDisposable(outcome.disposableIncomePence, snapshot)}
             </span>
           </p>
         )}
