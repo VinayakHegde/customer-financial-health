@@ -26,6 +26,8 @@ describe("T28 — Framing ubiquity across outcome views (history half)", () => {
       id: "snap-1",
       customerId: "pat",
       takenAt: "2026-06-10T09:30:00.000Z",
+      currency: "GBP",
+      countryCode: "GB",
       ie: iePatSurplus,
       outcome: assess(iePatSurplus),
     };

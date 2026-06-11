@@ -5,6 +5,8 @@ import { assess } from "../affordability/calculator";
 import type {
   AffordabilityOutcome,
   Band,
+  CountryCode,
+  Currency,
   IncomeAndExpenditure,
   OutcomeState,
   Snapshot,
@@ -15,7 +17,12 @@ export type CreateSnapshotInput = {
   customerId: string;
   ie: IncomeAndExpenditure;
   outcome: AffordabilityOutcome;
+  currency?: Currency;
+  countryCode?: CountryCode;
 };
+
+const DEFAULT_CURRENCY: Currency = "GBP";
+const DEFAULT_COUNTRY_CODE: CountryCode = "GB";
 
 export type SnapshotRepository = {
   createSnapshot: (input: CreateSnapshotInput) => Snapshot;
@@ -31,6 +38,8 @@ function rowToSnapshot(row: typeof snapshots.$inferSelect): Snapshot {
     id: row.id,
     customerId: row.customerId,
     takenAt: row.takenAt,
+    currency: row.currency as Currency,
+    countryCode: row.countryCode as CountryCode,
     ie,
     outcome: {
       ...assessed,
@@ -51,6 +60,8 @@ export function createSnapshotRepository(
       const id = randomUUID();
       const takenAt = new Date().toISOString();
       const { customerId, ie, outcome } = input;
+      const currency = input.currency ?? DEFAULT_CURRENCY;
+      const countryCode = input.countryCode ?? DEFAULT_COUNTRY_CODE;
 
       db.insert(snapshots)
         .values({
@@ -63,6 +74,8 @@ export function createSnapshotRepository(
           incomePence: outcome.totalIncomePence,
           expenditurePence: outcome.totalExpenditurePence,
           disposablePence: outcome.disposableIncomePence,
+          currency,
+          countryCode,
         })
         .run();
 
@@ -70,6 +83,8 @@ export function createSnapshotRepository(
         id,
         customerId,
         takenAt,
+        currency,
+        countryCode,
         ie,
         outcome,
       };

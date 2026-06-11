@@ -16,6 +16,8 @@ function toSnapshot(
     id,
     customerId: "pat",
     takenAt,
+    currency: "GBP",
+    countryCode: "GB",
     ie,
     outcome: assess(ie),
   };
