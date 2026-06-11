@@ -19,9 +19,10 @@ The MVP customer-facing affordability surface, as specified in `docs/TECH_SPEC.m
 | **S4 fixes** | `.data/` mkdir; persona picker on `/`; `/support` page; no-snapshot delta; integer near-breakeven; T12 spy aggregation; invalid persona cookie redirect | — | [S015](./docs/ai/sessions/S015-fixes.md) |
 | **S5** | `<UpdateForm />`, update page, `updateSnapshotAction`, pounds→pence parse | T18–T20, T24, T25, T35, T36, T37, T38 | [S016](./docs/ai/sessions/S016-implement-s5.md) |
 | **S6** | `<HistoryList />`, history page | T26, T27, T28 (history half), T39 | [S017](./docs/ai/sessions/S017-implement-s6.md) |
-| **S8** | `README.md`, `DECISIONS.md`, prompt-history backfill | T40, T41, T42 (manual checklists) | [S018](./docs/ai/sessions/S018-implement-s8.md) (this session) |
+| **S8** | `README.md`, `DECISIONS.md`, prompt-history backfill | T40, T41, T42 (manual checklists) | [S018](./docs/ai/sessions/S018-implement-s8.md) |
+| **S019 — UI polish + iteration** *(non-feature)* | `<AppHeader />` (new, non-sticky, path-aware via `usePathname()`, hides nav for `no-data` personas), radio-card persona picker, dashboard hero with income / outgoings / disposable metrics + relocated dashboard-actions nav, history timeline cards, shared `<BackToDashboardLink />` (HistoryList + UpdateForm), real cookie-clearing `switchPersona` Server Action, data-driven new-customer CTA copy ("Add" vs "Update"), calmer neutral palette + `lucide-react` icons, anonymised DB-open log, font wiring fix | No new `T*` (visual + UX-only); existing T21–T28, T32–T39, T43–T45 all still pass; `tests/s3/persona-picker.test.tsx` updated for the `<select>` → radio-group transition | [S019](./docs/ai/sessions/S019-ui-polish.md) |
 
-**Test totals at S018 close:** 131 automated tests across 48 files (Vitest + `@testing-library/react` + jsdom + `vitest-axe`). Plus T40 / T41 / T42 as **manual checklists** that S8 satisfies by shipping these very documents and the prompt-history chain.
+**Test totals at S019 close:** 131 automated tests across 48 files (Vitest + `@testing-library/react` + jsdom + `vitest-axe`) — the same count as at S018 close. The S019 pass was originally scoped as **visual-only** but the user's iteration round (D-120 → D-128) added one new Server Action (`switchPersona`, symmetric to the existing `selectPersona`) and one new data read in `<AppHeader />` (`getLatestSnapshot` for the no-data state). No calculation, validation, persistence, or PRD requirement changed. Three deliberate scope exceptions are recorded against the original "no scope change" framing: D-119 (DB log anonymised; §S2 amendment queued), D-123 (Switch persona affordance moved from `<DashboardView />` to `<AppHeader />`; §S4 amendment queued), and D-128 (new-customer UX refinements; folded into the same §S4 amendment). Only one existing test file changed structure — `tests/s3/persona-picker.test.tsx`, because the persona picker DOM moved from `<select>` / `<option>` to a real radio group; the test now asserts `role="group"` + exact radio count + `name="personaId"` instead of select-only DOM. T40 / T41 / T42 remain manual checklists that S8 + S019's documentation refresh satisfy together.
 
 **Requirement coverage** (full matrix in `docs/TEST_PLAN.md` §5):
 
@@ -78,12 +79,16 @@ Ordered by my best read of reviewer-perceived value, not by effort.
 4. **Per-line delta for R2.** Today the delta is a single disposable-£ figure plus a band-change indicator. Per-line deltas need a stable line-identity story (line ids, edits to existing lines vs new lines) — A5 explicitly defers this. Worth doing once a real customer touches the product.
 5. **Carry the framing-copy guard further.** The R20 `forbiddenToneTokens` / advice-implying token list is short. A bigger lexicon (or even a small LLM-as-a-linter pass over copy) would catch drift sooner. Out of scope for MVP per `docs/TECH_SPEC.md` §5.
 6. **Lower-risk follow-ups not worth listing individually** — small a11y polish (e.g. surfacing `irregularIncomeNote` in `<HistoryList />` rows, not just the dashboard); a tone-token-list expansion for R20; a cleaner separation between the two "framing" surfaces (`<FramingNotice />` for R20 vs `<SupportSignpost />` for R7) so future copy changes don't drift between them.
+7. **TECH_SPEC amendments queued (three changes for a single future `/tech-spec` round).** All three are documented scope exceptions in the S019 snapshot; all three need spec text only, no code follow-up.
+   - **§S2 — DB-open log line.** D-105 anonymised `lib/db/migrate.ts` from `db: opened path=${dbPath}` to `db: opened` (R10 data-minimisation). §S2 still records the old log line as the contract. Upgrade D-105 to a deliberate scope exception was recorded as D-119.
+   - **§S4 bullet 1 — split persona name from Switch persona affordance.** §S4 currently lists "1. Persona name + a 'Switch persona' link to `/`" as the View's first render. After the S019 polish + the user's deduplication feedback (D-110 → D-120 → D-123), the persona name still renders *inside* `<DashboardView />` (in the hero greeting), but the Switch persona affordance is now owned by the global `<AppHeader />` server component, which invokes the same `switchPersona` Server Action. The amendment splits the bullet in two, with the affordance owned by the header rather than the View, and removes the standalone-View contract for the affordance.
+   - **§S4 bullet 7 + new no-data clause — primary-CTA verb varies by snapshot state, no-data state hides ancillary navigation.** §S4 bullet 7 currently reads "primary CTA: Update my income & outgoings". D-128 makes the verb data-driven: `Update` when there is at least one stored snapshot, `Add` when there is none. The same amendment should add a short clause covering the no-data state: `<AppHeader />` omits the `Update` and `History` nav links, and the dashboard hero omits the "View past submissions" affordance, until the first snapshot exists. The CTA target (`/dashboard/update`), the SupportSignpost (R7), and the FramingNotice (R20) all remain unconditional.
 
 ---
 
 ## Why those choices were made
 
-The single throughline behind all of these calls was **the take-home brief's "don't over-engineer" framing** (brief lines 99–113) plus the project's strict five-phase workflow (`CLAUDE.md`, `.cursor/rules/00-workflow.mdc`).
+The single throughline behind all of these calls was **the take-home brief's "don't over-engineer" framing** (brief lines 99–113) plus the project's strict five-phase workflow (committed source-of-truth in [`.rulesync/rules/00-workflow.md`](./.rulesync/rules/00-workflow.md) and [`AGENTS.md`](./AGENTS.md); tool-native equivalents in `CLAUDE.md` / `.cursor/` are gitignored generated outputs).
 
 Concretely:
 
@@ -112,7 +117,10 @@ Approximate hours per phase, rounded. "Sessions" lists the curated `SNNN-*.md` s
 | 3. Tech spec | S007 (3 revisions, 2 critic rounds) | ~4 |
 | 4. Test plan | S008 (+ critic) | ~2 |
 | 5. Implementation | S009 (S7-setup) → S017 (S6) inc. S015 fixes | ~8 |
-| 5. Submission deliverables | S018 (this slice) | ~1 |
-| **Total** | 18 sessions | **~23 hours** |
+| 5. Submission deliverables | S018 | ~1 |
+| 5. UI polish + iteration | S019 (5 passes: polish → fixes → /implement S8 re-verify → critic-driven → user-driven UX iteration) | ~4 |
+| **Total** | **19 sessions** | **~27 hours** |
+
+> **Reconciliation note.** [`docs/PROMPT_HISTORY.md`](./docs/PROMPT_HISTORY.md) carries **20 session rows** (S000 → S019). The 19-vs-20 difference is **S001 — pre-brief task-analysis**, which was **withdrawn at S003 D-14** (it scoped a collections / arrangements workflow the brief does not ask for) but kept in the index for prompt-history transparency. The 19-session count above therefore reflects sessions that actually contributed to the delivered artefact.
 
 These are walltime estimates; AI-assisted sessions are often shorter than equivalent hand-coded work, but the count includes reading the tech-spec, writing tests first, running each critic round, and applying the resulting follow-ups.
