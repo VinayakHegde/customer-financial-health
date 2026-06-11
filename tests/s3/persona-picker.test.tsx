@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { personas } from "../../lib/personas";
-import { selectPersona } from "../../src/app/actions";
-import Home from "../../src/app/page";
+import { selectPersona } from "../../src/app/(main)/actions";
+import Home from "../../src/app/(main)/page";
 import {
   getActivePersonaIdForTests,
   withPersonaCookie,

@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
-import { DashboardView } from "../../../components/DashboardView";
-import { assess } from "../../../lib/affordability/calculator";
-import { getCopyForOutcome } from "../../../lib/affordability/copy";
-import { computeDelta } from "../../../lib/dashboard/computeDelta";
-import { listSnapshots } from "../../../lib/db";
-import { getPersonaId } from "../../../lib/identity/persona-cookie";
-import { getPersonaById } from "../../../lib/personas";
+import { DashboardView } from "../../../../components/DashboardView";
+import { assess } from "../../../../lib/affordability/calculator";
+import { getCopyForOutcome } from "../../../../lib/affordability/copy";
+import { computeDelta } from "../../../../lib/dashboard/computeDelta";
+import { listSnapshots } from "../../../../lib/db";
+import { getPersonaId } from "../../../../lib/identity/persona-cookie";
+import { getPersonaById } from "../../../../lib/personas";
 
 export default async function DashboardPage() {
   const personaId = await getPersonaId();
@@ -29,6 +29,7 @@ export default async function DashboardPage() {
       outcome={outcome}
       copy={getCopyForOutcome(outcome.state)}
       delta={delta}
+      latestSnapshotId={latest?.id ?? null}
     />
   );
 }

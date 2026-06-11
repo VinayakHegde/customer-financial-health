@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import SupportPage from "../../src/app/support/page";
+import SupportPage from "../../src/app/(main)/support/page";
 
 describe("Support page", () => {
   it("renders support content and a link back home", () => {

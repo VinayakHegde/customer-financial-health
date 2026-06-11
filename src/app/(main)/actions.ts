@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import {
   clearPersonaId,
   setPersonaId,
-} from "../../lib/identity/persona-cookie";
-import { getPersonaById } from "../../lib/personas";
+} from "../../../lib/identity/persona-cookie";
+import { getPersonaById } from "../../../lib/personas";
 
 export async function selectPersona(formData: FormData): Promise<void> {
   const personaId = formData.get("personaId");
