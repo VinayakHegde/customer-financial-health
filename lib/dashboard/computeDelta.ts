@@ -14,6 +14,9 @@ function bandRank(band: Band | null): number {
 }
 
 export function computeDelta(snapshots: Snapshot[]): Delta {
+  if (snapshots.length === 0) {
+    return { kind: "no-snapshot" };
+  }
   if (snapshots.length < 2) {
     return { kind: "first-snapshot" };
   }

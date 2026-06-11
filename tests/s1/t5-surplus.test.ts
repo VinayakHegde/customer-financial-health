@@ -10,7 +10,7 @@ describe("T5 — Calculator: surplus branch + near-breakeven note", () => {
     expect(outcome.band).toBe("surplus");
     expect(outcome.disposableIncomePence).toBeGreaterThan(0);
     expect(outcome.disposableIncomePence).toBeLessThanOrEqual(
-      Math.floor(outcome.totalIncomePence * 0.05),
+      Math.floor((outcome.totalIncomePence * 5) / 100),
     );
     expect(
       outcome.reasons.some((reason) =>

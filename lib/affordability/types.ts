@@ -45,6 +45,7 @@ export type Snapshot = {
 };
 
 export type Delta =
+  | { kind: "no-snapshot" }
   | { kind: "first-snapshot" }
   | {
       kind: "change";

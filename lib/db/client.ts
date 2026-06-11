@@ -1,3 +1,5 @@
+import { mkdirSync } from "node:fs";
+import { dirname } from "node:path";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { applyMigrations } from "./migrate";
@@ -13,6 +15,7 @@ export function getSnapshotRepository(): SnapshotRepository {
     return repository;
   }
 
+  mkdirSync(dirname(DB_PATH), { recursive: true });
   const sqlite = new Database(DB_PATH);
   const db = drizzle(sqlite);
   applyMigrations(db, DB_PATH);

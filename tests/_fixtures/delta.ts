@@ -1,5 +1,7 @@
 import type { Delta } from "../../lib/affordability/types";
 
+export const deltaNoSnapshot: Delta = { kind: "no-snapshot" };
+
 export const deltaFirstSnapshot: Delta = { kind: "first-snapshot" };
 
 export const deltaChangeImproved: Delta = {
