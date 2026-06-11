@@ -10,14 +10,17 @@ import {
   TrendingUp,
   Wallet,
 } from "lucide-react";
-import { formatPounds } from "../lib/affordability/format";
+import { formatMoney } from "../lib/affordability/format";
 import type {
   AffordabilityOutcome,
   Band,
+  CountryCode,
+  Currency,
   Delta,
   OutcomeCopy,
 } from "../lib/affordability/types";
 import { personaFirstName } from "../lib/personas";
+import { DownloadPdfLink } from "./DownloadPdfLink";
 import { FramingNotice } from "./FramingNotice";
 import { ShareSnapshotForm } from "./ShareSnapshotForm";
 import { SupportSignpost } from "./SupportSignpost";
@@ -33,30 +36,47 @@ export type DashboardViewProps = {
    * outcome. Null when no snapshot has been submitted yet (no-data persona).
    */
   latestSnapshotId?: string | null;
+  /**
+   * Currency + country_code threaded through to `formatMoney`. Optional so
+   * the no-data persona (no stored snapshot) can render without a snapshot
+   * lookup; defaults match the MVP's only-locale-shipped (`GBP` / `GB`).
+   * S12 made these load-bearing — T73 asserts the dashboard's rendered
+   * money strings match the PDF's `formatMoney` output verbatim.
+   */
+  currency?: Currency;
+  countryCode?: CountryCode;
 };
 
 const SNAPSHOT_HEADING_ID = "snapshot-heading";
 const REASONS_HEADING_ID = "reasons-heading";
 const DELTA_HEADING_ID = "delta-heading";
 
-function formatSignedDisposable(pence: number): string {
+function formatSignedDisposable(
+  pence: number,
+  currency: Currency,
+  countryCode: CountryCode,
+): string {
   if (pence > 0) {
-    return `+${formatPounds(pence)}`;
+    return `+${formatMoney(pence, currency, countryCode)}`;
   }
   if (pence < 0) {
-    return `−${formatPounds(Math.abs(pence))}`;
+    return `−${formatMoney(Math.abs(pence), currency, countryCode)}`;
   }
-  return formatPounds(0);
+  return formatMoney(0, currency, countryCode);
 }
 
-function formatSignedDelta(pence: number): string {
+function formatSignedDelta(
+  pence: number,
+  currency: Currency,
+  countryCode: CountryCode,
+): string {
   if (pence > 0) {
-    return `+${formatPounds(pence)}`;
+    return `+${formatMoney(pence, currency, countryCode)}`;
   }
   if (pence < 0) {
-    return `−${formatPounds(Math.abs(pence))}`;
+    return `−${formatMoney(Math.abs(pence), currency, countryCode)}`;
   }
-  return formatPounds(0);
+  return formatMoney(0, currency, countryCode);
 }
 
 function formatSnapshotDate(iso: string): string {
@@ -96,7 +116,15 @@ function BandChangeIcon({
   return <Minus aria-hidden="true" className="h-4 w-4 text-muted" />;
 }
 
-function DeltaPanel({ delta }: { delta: Delta }) {
+function DeltaPanel({
+  delta,
+  currency,
+  countryCode,
+}: {
+  delta: Delta;
+  currency: Currency;
+  countryCode: CountryCode;
+}) {
   if (delta.kind === "no-snapshot") {
     return (
       <p>
@@ -115,7 +143,11 @@ function DeltaPanel({ delta }: { delta: Delta }) {
     );
   }
 
-  const changeAmount = formatSignedDelta(delta.disposableDeltaPence);
+  const changeAmount = formatSignedDelta(
+    delta.disposableDeltaPence,
+    currency,
+    countryCode,
+  );
   const previousDate = formatSnapshotDate(delta.previousTakenAt);
 
   return (
@@ -178,6 +210,8 @@ export function DashboardView({
   copy,
   delta,
   latestSnapshotId = null,
+  currency = "GBP",
+  countryCode = "GB",
 }: DashboardViewProps) {
   const showFinancialSummary = outcome.state !== "no-data";
   const band = outcome.band;
@@ -215,23 +249,41 @@ export function DashboardView({
           Hello,{" "}
           <span className="font-medium text-foreground">{firstName}</span>.
         </p>
-        <h1
-          id={SNAPSHOT_HEADING_ID}
-          className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
-        >
-          {copy.headline}
-        </h1>
+        {/* Headline + Download PDF on the same row. `items-start` keeps the
+            button anchored to the top of the headline area so it doesn't
+            visually drift down if the headline ever wraps to two lines.
+            Button only renders when a snapshot exists (no-data state has
+            nothing to export). */}
+        <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
+          <h1
+            id={SNAPSHOT_HEADING_ID}
+            className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
+          >
+            {copy.headline}
+          </h1>
+          {latestSnapshotId !== null && (
+            <DownloadPdfLink snapshotId={latestSnapshotId} />
+          )}
+        </div>
 
         {showFinancialSummary && (
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
             <SnapshotMetric
               label="Total income"
-              value={formatPounds(outcome.totalIncomePence)}
+              value={formatMoney(
+                outcome.totalIncomePence,
+                currency,
+                countryCode,
+              )}
               icon={<Wallet aria-hidden="true" className="h-3.5 w-3.5" />}
             />
             <SnapshotMetric
               label="Total outgoings"
-              value={formatPounds(outcome.totalExpenditurePence)}
+              value={formatMoney(
+                outcome.totalExpenditurePence,
+                currency,
+                countryCode,
+              )}
               icon={
                 <ClipboardList aria-hidden="true" className="h-3.5 w-3.5" />
               }
@@ -239,7 +291,11 @@ export function DashboardView({
             <SnapshotMetric
               testId="disposable-income"
               label="Disposable income"
-              value={formatSignedDisposable(outcome.disposableIncomePence)}
+              value={formatSignedDisposable(
+                outcome.disposableIncomePence,
+                currency,
+                countryCode,
+              )}
               emphasis
               icon={<TrendingUp aria-hidden="true" className="h-3.5 w-3.5" />}
             />
@@ -253,13 +309,22 @@ export function DashboardView({
           </p>
         )}
 
+        {latestSnapshotId !== null && (
+          <div className="mt-6">
+            <ShareSnapshotForm snapshotId={latestSnapshotId} />
+          </div>
+        )}
+
         <nav
           aria-label="Dashboard actions"
           className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end"
         >
           {/* New-customer (no-data) state: "View past submissions" hidden
               because there are none, and the primary CTA reads "Add" instead
-              of "Update" because the customer has no prior I&E to update. */}
+              of "Update" because the customer has no prior I&E to update.
+              Download PDF lives next to the headline above (when a snapshot
+              exists); Share lives in its own block between the metrics and
+              this nav. */}
           {!showFinancialSummary ? null : (
             <a
               href="/history"
@@ -315,16 +380,14 @@ export function DashboardView({
             <span>How you&apos;ve changed</span>
           </h2>
           <div className="mt-3 text-sm leading-relaxed text-foreground">
-            <DeltaPanel delta={delta} />
+            <DeltaPanel
+              delta={delta}
+              currency={currency}
+              countryCode={countryCode}
+            />
           </div>
         </section>
       </div>
-
-      {latestSnapshotId !== null && (
-        <div className="mt-6">
-          <ShareSnapshotForm snapshotId={latestSnapshotId} />
-        </div>
-      )}
 
       <div className="mt-6">
         <SupportSignpost state={outcome.state} />

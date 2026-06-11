@@ -1,7 +1,8 @@
 import { CalendarDays, ClipboardList, PencilLine, Wallet } from "lucide-react";
-import { formatPounds } from "../lib/affordability/format";
+import { formatMoney } from "../lib/affordability/format";
 import type { Band, OutcomeState, Snapshot } from "../lib/affordability/types";
 import { BackToDashboardLink } from "./BackToDashboardLink";
+import { DownloadPdfLink } from "./DownloadPdfLink";
 import { FramingNotice } from "./FramingNotice";
 import { ShareSnapshotForm } from "./ShareSnapshotForm";
 import { SupportSignpost } from "./SupportSignpost";
@@ -12,14 +13,14 @@ export type HistoryListProps = {
 
 const PAGE_TITLE_ID = "history-page-title";
 
-function formatSignedDisposable(pence: number): string {
+function formatSignedDisposable(pence: number, snapshot: Snapshot): string {
   if (pence > 0) {
-    return `+${formatPounds(pence)}`;
+    return `+${formatMoney(pence, snapshot.currency, snapshot.countryCode)}`;
   }
   if (pence < 0) {
-    return `−${formatPounds(Math.abs(pence))}`;
+    return `−${formatMoney(Math.abs(pence), snapshot.currency, snapshot.countryCode)}`;
   }
-  return formatPounds(0);
+  return formatMoney(0, snapshot.currency, snapshot.countryCode);
 }
 
 function formatSnapshotDate(iso: string): string {
@@ -115,7 +116,11 @@ function IeBreakdown({ snapshot }: { snapshot: Snapshot }) {
               >
                 <dt className="text-sm text-foreground">{earner.label}</dt>
                 <dd className="text-sm font-medium tabular-nums sm:text-right">
-                  {formatPounds(earner.amountPence)}
+                  {formatMoney(
+                    earner.amountPence,
+                    snapshot.currency,
+                    snapshot.countryCode,
+                  )}
                 </dd>
               </div>
             ))}
@@ -147,7 +152,11 @@ function IeBreakdown({ snapshot }: { snapshot: Snapshot }) {
               >
                 <dt className="text-sm text-foreground">{line.label}</dt>
                 <dd className="text-sm font-medium tabular-nums sm:text-right">
-                  {formatPounds(line.amountPence)}
+                  {formatMoney(
+                    line.amountPence,
+                    snapshot.currency,
+                    snapshot.countryCode,
+                  )}
                 </dd>
               </div>
             ))}
@@ -208,7 +217,7 @@ function SnapshotRow({ snapshot, now }: { snapshot: Snapshot; now: Date }) {
           >
             Disposable income:{" "}
             <span className="font-semibold tabular-nums">
-              {formatSignedDisposable(outcome.disposableIncomePence)}
+              {formatSignedDisposable(outcome.disposableIncomePence, snapshot)}
             </span>
           </p>
         )}
@@ -223,12 +232,21 @@ function SnapshotRow({ snapshot, now }: { snapshot: Snapshot; now: Date }) {
         )}
       </div>
 
-      <details className="mt-4 sm:pl-3">
-        <summary className="inline-flex min-h-6 min-w-6 cursor-pointer items-center gap-1.5 rounded-md text-sm font-medium text-foreground underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring">
-          Show what was submitted on {formattedDate}
-        </summary>
-        <IeBreakdown snapshot={snapshot} />
-      </details>
+      {/* Disclosure + Download pair: the disclosure previews the snapshot
+          contents inline; Download PDF saves the same contents as a file.
+          Both are "personal-consumption" actions, distinct from the
+          third-party outbound action below (Share). Items anchor to the top
+          so the button stays aligned to the summary row when the disclosure
+          expands. */}
+      <div className="mt-4 flex flex-wrap items-start justify-between gap-3 sm:pl-3">
+        <details className="grow">
+          <summary className="inline-flex min-h-6 min-w-6 cursor-pointer items-center gap-1.5 rounded-md text-sm font-medium text-foreground underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring">
+            Show what was submitted on {formattedDate}
+          </summary>
+          <IeBreakdown snapshot={snapshot} />
+        </details>
+        <DownloadPdfLink snapshotId={snapshot.id} />
+      </div>
 
       <div className="mt-4 sm:pl-3">
         <ShareSnapshotForm snapshotId={snapshot.id} />

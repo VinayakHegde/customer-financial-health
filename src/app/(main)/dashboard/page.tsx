@@ -30,6 +30,8 @@ export default async function DashboardPage() {
       copy={getCopyForOutcome(outcome.state)}
       delta={delta}
       latestSnapshotId={latest?.id ?? null}
+      currency={latest?.currency ?? "GBP"}
+      countryCode={latest?.countryCode ?? "GB"}
     />
   );
 }
