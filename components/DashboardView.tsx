@@ -19,6 +19,7 @@ import type {
 } from "../lib/affordability/types";
 import { personaFirstName } from "../lib/personas";
 import { FramingNotice } from "./FramingNotice";
+import { ShareSnapshotForm } from "./ShareSnapshotForm";
 import { SupportSignpost } from "./SupportSignpost";
 
 export type DashboardViewProps = {
@@ -26,6 +27,12 @@ export type DashboardViewProps = {
   outcome: AffordabilityOutcome;
   copy: OutcomeCopy;
   delta: Delta;
+  /**
+   * The id of the latest snapshot, if any. Used to seed the share-link form
+   * so the customer can mint a 24-hour share link for the displayed
+   * outcome. Null when no snapshot has been submitted yet (no-data persona).
+   */
+  latestSnapshotId?: string | null;
 };
 
 const SNAPSHOT_HEADING_ID = "snapshot-heading";
@@ -170,6 +177,7 @@ export function DashboardView({
   outcome,
   copy,
   delta,
+  latestSnapshotId = null,
 }: DashboardViewProps) {
   const showFinancialSummary = outcome.state !== "no-data";
   const band = outcome.band;
@@ -311,6 +319,12 @@ export function DashboardView({
           </div>
         </section>
       </div>
+
+      {latestSnapshotId !== null && (
+        <div className="mt-6">
+          <ShareSnapshotForm snapshotId={latestSnapshotId} />
+        </div>
+      )}
 
       <div className="mt-6">
         <SupportSignpost state={outcome.state} />
