@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
-import { UpdateForm } from "../../../../components/UpdateForm";
-import { getLatestSnapshot } from "../../../../lib/db";
-import { getPersonaId } from "../../../../lib/identity/persona-cookie";
-import { getPersonaById } from "../../../../lib/personas";
+import { UpdateForm } from "../../../../../components/UpdateForm";
+import { getLatestSnapshot } from "../../../../../lib/db";
+import { getPersonaId } from "../../../../../lib/identity/persona-cookie";
+import { getPersonaById } from "../../../../../lib/personas";
 import { updateSnapshotAction } from "./actions";
 
 export default async function UpdatePage() {

@@ -31,7 +31,7 @@ vi.mock("next/cache", () => ({
   revalidatePath: (path: string) => revalidatePathMock(path),
 }));
 
-import { updateSnapshotAction } from "../../src/app/dashboard/update/actions";
+import { updateSnapshotAction } from "../../src/app/(main)/dashboard/update/actions";
 
 describe("T18 — Server Action: happy path", () => {
   let teardownCookie: (() => void) | undefined;

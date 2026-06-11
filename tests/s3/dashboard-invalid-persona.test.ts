@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import DashboardPage from "../../src/app/dashboard/page";
+import DashboardPage from "../../src/app/(main)/dashboard/page";
 import { withPersonaCookie } from "../_helpers/withPersonaCookie";
 
 const redirectMock = vi.hoisted(() =>

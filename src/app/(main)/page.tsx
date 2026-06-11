@@ -1,6 +1,6 @@
 import { ArrowRight, Compass, ShieldCheck, UsersRound } from "lucide-react";
-import type { OutcomeState } from "../../lib/affordability/types";
-import { personas } from "../../lib/personas";
+import type { OutcomeState } from "../../../lib/affordability/types";
+import { personas } from "../../../lib/personas";
 import { selectPersona } from "./actions";
 
 const personaTagLabels: Record<OutcomeState, string> = {

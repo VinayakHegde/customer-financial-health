@@ -29,7 +29,7 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
-import { updateSnapshotAction } from "../../src/app/dashboard/update/actions";
+import { updateSnapshotAction } from "../../src/app/(main)/dashboard/update/actions";
 
 const consoleMethods = ["log", "info", "debug", "warn", "error"] as const;
 

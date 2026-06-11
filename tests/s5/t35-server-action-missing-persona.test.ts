@@ -25,7 +25,7 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
-import { updateSnapshotAction } from "../../src/app/dashboard/update/actions";
+import { updateSnapshotAction } from "../../src/app/(main)/dashboard/update/actions";
 
 describe("T35 — Server Action: missing or invalid persona cookie", () => {
   let teardownCookie: (() => void) | undefined;

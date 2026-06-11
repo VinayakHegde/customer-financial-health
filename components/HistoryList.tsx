@@ -3,6 +3,7 @@ import { formatPounds } from "../lib/affordability/format";
 import type { Band, OutcomeState, Snapshot } from "../lib/affordability/types";
 import { BackToDashboardLink } from "./BackToDashboardLink";
 import { FramingNotice } from "./FramingNotice";
+import { ShareSnapshotForm } from "./ShareSnapshotForm";
 import { SupportSignpost } from "./SupportSignpost";
 
 export type HistoryListProps = {
@@ -228,6 +229,10 @@ function SnapshotRow({ snapshot, now }: { snapshot: Snapshot; now: Date }) {
         </summary>
         <IeBreakdown snapshot={snapshot} />
       </details>
+
+      <div className="mt-4 sm:pl-3">
+        <ShareSnapshotForm snapshotId={snapshot.id} />
+      </div>
     </li>
   );
 }

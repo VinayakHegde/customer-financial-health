@@ -1,0 +1,9 @@
+# Customer Financial Health — robots.txt
+#
+# Advisory only. Well-behaved crawlers will skip /share/<token> URLs; the
+# load-bearing assertion is the X-Robots-Tag: noindex, nofollow HTTP header
+# emitted by middleware.ts on /share/* (per tech-spec §S11 cache / indexing
+# posture).
+
+User-agent: *
+Disallow: /share/

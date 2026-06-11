@@ -8,7 +8,7 @@ import {
   PencilLine,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { switchPersona } from "../src/app/actions";
+import { switchPersona } from "../src/app/(main)/actions";
 
 /**
  * The non-brand region of `<AppHeader />` — the primary nav, the active-persona

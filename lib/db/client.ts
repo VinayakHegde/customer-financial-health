@@ -4,24 +4,45 @@ import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { applyMigrations } from "./migrate";
 import { seedStartingSnapshotsIfEmpty } from "./seed";
+import {
+  createShareLinkRepository,
+  type ShareLinkRepository,
+} from "./share-links";
 import { createSnapshotRepository, type SnapshotRepository } from "./snapshots";
 
 const DB_PATH = `${process.cwd()}/.data/financial-health.sqlite`;
 
-let repository: SnapshotRepository | null = null;
+type Repositories = {
+  snapshots: SnapshotRepository;
+  shareLinks: ShareLinkRepository;
+};
 
-export function getSnapshotRepository(): SnapshotRepository {
-  if (repository) {
-    return repository;
+let repositories: Repositories | null = null;
+
+function getRepositories(): Repositories {
+  if (repositories) {
+    return repositories;
   }
 
   mkdirSync(dirname(DB_PATH), { recursive: true });
   const sqlite = new Database(DB_PATH);
   const db = drizzle(sqlite);
   applyMigrations(db, DB_PATH);
-  repository = createSnapshotRepository(db);
-  seedStartingSnapshotsIfEmpty(db, repository);
-  return repository;
+  const snapshots = createSnapshotRepository(db);
+  seedStartingSnapshotsIfEmpty(db, snapshots);
+  repositories = {
+    snapshots,
+    shareLinks: createShareLinkRepository(db),
+  };
+  return repositories;
+}
+
+export function getSnapshotRepository(): SnapshotRepository {
+  return getRepositories().snapshots;
+}
+
+export function getShareLinkRepository(): ShareLinkRepository {
+  return getRepositories().shareLinks;
 }
 
 export const createSnapshot = (
@@ -33,3 +54,13 @@ export const listSnapshots = (customerId: string) =>
 
 export const getLatestSnapshot = (customerId: string) =>
   getSnapshotRepository().getLatestSnapshot(customerId);
+
+export const getSnapshotById = (id: string) =>
+  getSnapshotRepository().getSnapshotById(id);
+
+export const createShareLink = (
+  input: Parameters<ShareLinkRepository["createShareLink"]>[0],
+) => getShareLinkRepository().createShareLink(input);
+
+export const getShareLinkByTokenHash = (tokenHash: string, now: Date) =>
+  getShareLinkRepository().getShareLinkByTokenHash(tokenHash, now);
