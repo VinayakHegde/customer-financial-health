@@ -2631,3 +2631,761 @@ S015 is closed.
 **Recorded:** `docs/ai/sessions/S015-fixes.md`, `docs/PROMPT_HISTORY.md`
 
 **Next up:** `/implement S5` — update form, Server Action, and submit flow.
+
+---
+
+_**User**_
+
+/ac in a new feature branch
+
+---
+
+_**Agent (default)**_
+
+Inspecting changes and grouping them for atomic commits on a new feature branch.
+
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git status && git log -5 --oneline</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git status && git log -5 --oneline
+```
+
+```
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add &lt;file&gt;..." to update what will be committed)
+  (use "git restore &lt;file&gt;..." to discard changes in working directory)
+	modified:   .specstory/statistics.json
+	modified:   components/DashboardView.tsx
+	modified:   docs/PROMPT_HISTORY.md
+	modified:   lib/affordability/calculator.ts
+	modified:   lib/affordability/types.ts
+	modified:   lib/dashboard/computeDelta.ts
+	modified:   lib/db/client.ts
+	modified:   src/app/dashboard/page.tsx
+	modified:   src/app/page.tsx
+	modified:   tests/_fixtures/delta.ts
+	modified:   tests/s1/t5-surplus.test.ts
+	modified:   tests/s2/t12-logging-hygiene.test.ts
+	modified:   tests/s4/compute-delta.test.ts
+	modified:   tests/s4/t22-signpost-ubiquity.test.tsx
+
+Untracked files:
+  (use "git add &lt;file&gt;..." to include in what will be committed)
+	.specstory/history/2026-06-11_07-48-59Z-project-task-list-for-s015.md
+	docs/ai/sessions/S015-fixes.md
+	src/app/actions.ts
+	src/app/support/
+	tests/s3/dashboard-invalid-persona.test.ts
+	tests/s3/persona-picker.test.tsx
+	tests/s3/support-page.test.tsx
+	tests/s4/t23-no-snapshot-delta.test.tsx
+
+no changes added to commit (use "git add" and/or "git commit -a")
+d8467c6 Merge pull request #19 from VinayakHegde/feat/s4-dashboard
+f6efd04 prompt history
+03f724d Merge pull request #18 from VinayakHegde/feat/s4-dashboard
+05b49b4 chore(customer-financial-health): capture S014 SpecStory transcript
+081a288 docs(customer-financial-health): record S014 S4 implementation session
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git diff --stat && git diff</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git diff --stat && git diff
+```
+
+```
+ .specstory/statistics.json              |  9 ++++++++
+ components/DashboardView.tsx            |  9 ++++++++
+ docs/PROMPT_HISTORY.md                  |  1 +
+ lib/affordability/calculator.ts         |  2 +-
+ lib/affordability/types.ts              |  1 +
+ lib/dashboard/computeDelta.ts           |  3 +++
+ lib/db/client.ts                        |  3 +++
+ src/app/dashboard/page.tsx              |  6 +++++-
+ src/app/page.tsx                        | 38 +++++++++++++++++++++++++++++++--
+ tests/_fixtures/delta.ts                |  2 ++
+ tests/s1/t5-surplus.test.ts             |  2 +-
+ tests/s2/t12-logging-hygiene.test.ts    | 15 +++++++------
+ tests/s4/compute-delta.test.ts          |  7 ++++--
+ tests/s4/t22-signpost-ubiquity.test.tsx | 13 +++++------
+ 14 files changed, 91 insertions(+), 20 deletions(-)
+diff --git a/.specstory/statistics.json b/.specstory/statistics.json
+index ed378f9..41ddf44 100644
+--- a/.specstory/statistics.json
++++ b/.specstory/statistics.json
+@@ -108,6 +108,15 @@
+       "provider": "cursoride",
+       "last_updated": "2026-06-10T19:09:12Z"
+     },
++    "887fee19-4e1a-4e87-a08e-b78a8460040f": {
++      "user_message_count": 2,
++      "agent_message_count": 110,
++      "start_timestamp": "2026-06-11T08:48:59+01:00",
++      "end_timestamp": "2026-06-11T08:48:59+01:00",
++      "markdown_size_bytes": 82959,
++      "provider": "cursoride",
++      "last_updated": "2026-06-11T07:59:42Z"
++    },
+     "8b8e7f0d-5735-4d51-b537-606aced64eaa": {
+       "user_message_count": 3,
+       "agent_message_count": 131,
+diff --git a/components/DashboardView.tsx b/components/DashboardView.tsx
+index 2fe5622..451bfc0 100644
+--- a/components/DashboardView.tsx
++++ b/components/DashboardView.tsx
+@@ -58,6 +58,15 @@ function bandChipLabel(band: Band): { text: string; icon: string } {
+ }
+ 
+ function DeltaPanel({ delta }: { delta: Delta }) {
++  if (delta.kind === "no-snapshot") {
++    return (
++      &lt;p&gt;
++        Once you submit your income and outgoings, we&amp;apos;ll show how your
++        position changes over time.
++      &lt;/p&gt;
++    );
++  }
++
+   if (delta.kind === "first-snapshot") {
+     return (
+       &lt;p&gt;
+diff --git a/docs/PROMPT_HISTORY.md b/docs/PROMPT_HISTORY.md
+index 1a54831..d03023d 100644
+--- a/docs/PROMPT_HISTORY.md
++++ b/docs/PROMPT_HISTORY.md
+@@ -27,3 +27,4 @@ Curated session snapshots are stored in:
+ | S012 | &#96;/implement S3&#96; — Persona fixtures + cookie mock auth | &#96;.specstory/history/&#96; (SpecStory on window close) | &#96;docs/ai/sessions/S012-implement-s3.md&#96; | (uncommitted) on &#96;main&#96; | **Complete.** S3 shipped: &#96;lib/identity/persona-cookie.ts&#96; (&#96;getPersonaId&#96; / &#96;setPersonaId&#96;), &#96;lib/db/seed.ts&#96; + seed-on-first-open, **T13–T14 + seed integration pass** (56 tests total). D-67–D-70. Middleware redirect deferred to S4/S8 (documented in session). Handoff: **&#96;/implement S9&#96;**. |
+ | S013 | &#96;/implement S9&#96; — Reflection-not-advice framing | &#96;.specstory/history/&#96; (SpecStory on window close) | &#96;docs/ai/sessions/S013-implement-s9.md&#96; | &#96;591ff1c&#96; (merged PR #17) | **Closed.** S9 shipped: &#96;components/FramingNotice.tsx&#96; (uses existing &#96;lib/affordability/framing.ts&#96; from S1), **T43 + T32 pass** (58 tests total). D-71–D-73. &#96;@critic&#96; Minor fixes applied (T32 labelledby wiring, T43 href scan + spec comment, known R9/SC 2.5.8 limits). Handoff: **&#96;/implement S4&#96;**. |
+ | S014 | &#96;/implement S4&#96; — Affordability surface (dashboard) | &#96;.specstory/history/&#96; (SpecStory on window close) | &#96;docs/ai/sessions/S014-implement-s4.md&#96; | (uncommitted) on &#96;main&#96; | **Closed.** S4 shipped: &#96;&lt;DashboardView /&gt;&#96;, &#96;&lt;SupportSignpost /&gt;&#96;, &#96;src/app/dashboard/page.tsx&#96;, &#96;lib/dashboard/computeDelta.ts&#96;; signpost copy variants in &#96;copy.ts&#96;; **T21–T23, T33, T34, T22, T28 (dashboard half), T44, T45 pass** (91 tests after critic follow-up). D-74–D-76. &#96;@critic&#96; Minor fixes applied (&#96;computeDelta&#96; tests, R6 disposable sign, T33 hardening). Handoff: **&#96;/implement S5&#96;**. |
++| S015 | Post-S4 fixes (DB init, persona picker, support route, delta copy, integer math, T12, invalid persona) | &#96;.specstory/history/&#96; (SpecStory on window close) | &#96;docs/ai/sessions/S015-fixes.md&#96; | (uncommitted) on &#96;main&#96; | **Closed.** Seven fixes: &#96;.data/&#96; mkdir before SQLite open; persona picker on &#96;/&#96; + &#96;selectPersona&#96; action; &#96;/support&#96; page; &#96;no-snapshot&#96; delta distinct from &#96;first-snapshot&#96;; integer near-breakeven threshold; T12 aggregates all &#96;console.*&#96; spies; invalid persona cookie redirects to &#96;/&#96;. **98 tests pass.** Handoff: **&#96;/implement S5&#96;**. |
+diff --git a/lib/affordability/calculator.ts b/lib/affordability/calculator.ts
+index 9844c86..691921e 100644
+--- a/lib/affordability/calculator.ts
++++ b/lib/affordability/calculator.ts
+@@ -101,7 +101,7 @@ export function assess(ie: IncomeAndExpenditure): AffordabilityOutcome {
+     };
+   }
+ 
+-  const nearBreakevenThreshold = Math.floor(totalIncomePence * 0.05);
++  const nearBreakevenThreshold = Math.floor((totalIncomePence * 5) / 100);
+   const nearBreakevenNote =
+     disposableIncomePence &gt; 0 &amp;&amp; disposableIncomePence &lt;= nearBreakevenThreshold
+       ? "You have a little room after your outgoings, but only a small amount relative to your income."
+diff --git a/lib/affordability/types.ts b/lib/affordability/types.ts
+index 0a229f6..a59c8d3 100644
+--- a/lib/affordability/types.ts
++++ b/lib/affordability/types.ts
+@@ -45,6 +45,7 @@ export type Snapshot = {
+ };
+ 
+ export type Delta =
++  | { kind: "no-snapshot" }
+   | { kind: "first-snapshot" }
+   | {
+       kind: "change";
+diff --git a/lib/dashboard/computeDelta.ts b/lib/dashboard/computeDelta.ts
+index 9ae0976..5516f35 100644
+--- a/lib/dashboard/computeDelta.ts
++++ b/lib/dashboard/computeDelta.ts
+@@ -14,6 +14,9 @@ function bandRank(band: Band | null): number {
+ }
+ 
+ export function computeDelta(snapshots: Snapshot[]): Delta {
++  if (snapshots.length === 0) {
++    return { kind: "no-snapshot" };
++  }
+   if (snapshots.length &lt; 2) {
+     return { kind: "first-snapshot" };
+   }
+diff --git a/lib/db/client.ts b/lib/db/client.ts
+index fe8b35a..66c2e26 100644
+--- a/lib/db/client.ts
++++ b/lib/db/client.ts
+@@ -1,3 +1,5 @@
++import { mkdirSync } from "node:fs";
++import { dirname } from "node:path";
+ import Database from "better-sqlite3";
+ import { drizzle } from "drizzle-orm/better-sqlite3";
+ import { applyMigrations } from "./migrate";
+@@ -13,6 +15,7 @@ export function getSnapshotRepository(): SnapshotRepository {
+     return repository;
+   }
+ 
++  mkdirSync(dirname(DB_PATH), { recursive: true });
+   const sqlite = new Database(DB_PATH);
+   const db = drizzle(sqlite);
+   applyMigrations(db, DB_PATH);
+diff --git a/src/app/dashboard/page.tsx b/src/app/dashboard/page.tsx
+index 79cf7f9..487cc9f 100644
+--- a/src/app/dashboard/page.tsx
++++ b/src/app/dashboard/page.tsx
+@@ -14,6 +14,10 @@ export default async function DashboardPage() {
+   }
+ 
+   const persona = getPersonaById(personaId);
++  if (!persona) {
++    redirect("/");
++  }
++
+   const snapshots = listSnapshots(personaId);
+   const latest = snapshots[0];
+   const outcome = latest?.outcome ?? assess({ earners: [], expenditure: [] });
+@@ -21,7 +25,7 @@ export default async function DashboardPage() {
+ 
+   return (
+     &lt;DashboardView
+-      personaLabel={persona?.label ?? personaId}
++      personaLabel={persona.label}
+       outcome={outcome}
+       copy={getCopyForOutcome(outcome.state)}
+       delta={delta}
+diff --git a/src/app/page.tsx b/src/app/page.tsx
+index 41336bf..7ff4a82 100644
+--- a/src/app/page.tsx
++++ b/src/app/page.tsx
+@@ -1,7 +1,41 @@
++import { personas } from "../../lib/personas";
++import { selectPersona } from "./actions";
++
+ export default function Home() {
+   return (
+-    &lt;main&gt;
+-      &lt;h1&gt;Customer Financial Health&lt;/h1&gt;
++    &lt;main className="mx-auto max-w-lg px-4 py-8"&gt;
++      &lt;h1 className="text-2xl font-semibold text-foreground"&gt;
++        Customer Financial Health
++      &lt;/h1&gt;
++      &lt;p className="mt-2 text-sm text-foreground"&gt;
++        Choose a persona to explore the affordability dashboard.
++      &lt;/p&gt;
++      &lt;form action={selectPersona} className="mt-6 space-y-4"&gt;
++        &lt;div&gt;
++          &lt;label htmlFor="personaId" className="block text-sm font-medium text-foreground"&gt;
++            Persona
++          &lt;/label&gt;
++          &lt;select
++            id="personaId"
++            name="personaId"
++            required
++            className="mt-2 w-full rounded-md border border-foreground/20 bg-background px-3 py-2 text-sm text-foreground"
++          &gt;
++            &lt;option value=""&gt;Select a persona&lt;/option&gt;
++            {personas.map((persona) =&gt; (
++              &lt;option key={persona.id} value={persona.id}&gt;
++                {persona.label}
++              &lt;/option&gt;
++            ))}
++          &lt;/select&gt;
++        &lt;/div&gt;
++        &lt;button
++          type="submit"
++          className="inline-flex min-h-6 min-w-6 items-center justify-center rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
++        &gt;
++          Continue to dashboard
++        &lt;/button&gt;
++      &lt;/form&gt;
+     &lt;/main&gt;
+   );
+ }
+diff --git a/tests/_fixtures/delta.ts b/tests/_fixtures/delta.ts
+index 2c845d0..bb68391 100644
+--- a/tests/_fixtures/delta.ts
++++ b/tests/_fixtures/delta.ts
+@@ -1,5 +1,7 @@
+ import type { Delta } from "../../lib/affordability/types";
+ 
++export const deltaNoSnapshot: Delta = { kind: "no-snapshot" };
++
+ export const deltaFirstSnapshot: Delta = { kind: "first-snapshot" };
+ 
+ export const deltaChangeImproved: Delta = {
+diff --git a/tests/s1/t5-surplus.test.ts b/tests/s1/t5-surplus.test.ts
+index 5baf05e..3baa61a 100644
+--- a/tests/s1/t5-surplus.test.ts
++++ b/tests/s1/t5-surplus.test.ts
+@@ -10,7 +10,7 @@ describe("T5 — Calculator: surplus branch + near-breakeven note", () =&gt; {
+     expect(outcome.band).toBe("surplus");
+     expect(outcome.disposableIncomePence).toBeGreaterThan(0);
+     expect(outcome.disposableIncomePence).toBeLessThanOrEqual(
+-      Math.floor(outcome.totalIncomePence * 0.05),
++      Math.floor((outcome.totalIncomePence * 5) / 100),
+     );
+     expect(
+       outcome.reasons.some((reason) =&gt;
+diff --git a/tests/s2/t12-logging-hygiene.test.ts b/tests/s2/t12-logging-hygiene.test.ts
+index 37a3bcc..1583526 100644
+--- a/tests/s2/t12-logging-hygiene.test.ts
++++ b/tests/s2/t12-logging-hygiene.test.ts
+@@ -3,15 +3,15 @@ import { assess } from "../../lib/affordability/calculator";
+ import { ieJordanShortfall } from "../_fixtures/ie";
+ import { makeDb } from "../_helpers";
+ 
++const consoleMethods = ["log", "info", "debug", "warn", "error"] as const;
++
+ describe("T12 — DB logging hygiene", () =&gt; {
+-  let logSpy: ReturnType&lt;typeof vi.spyOn&gt;;
++  let consoleSpies: ReturnType&lt;typeof vi.spyOn&gt;[];
+ 
+   beforeEach(() =&gt; {
+-    logSpy = vi.spyOn(console, "log").mockImplementation(() =&gt; {});
+-    vi.spyOn(console, "info").mockImplementation(() =&gt; {});
+-    vi.spyOn(console, "debug").mockImplementation(() =&gt; {});
+-    vi.spyOn(console, "warn").mockImplementation(() =&gt; {});
+-    vi.spyOn(console, "error").mockImplementation(() =&gt; {});
++    consoleSpies = consoleMethods.map((method) =&gt;
++      vi.spyOn(console, method).mockImplementation(() =&gt; {}),
++    );
+   });
+ 
+   afterEach(() =&gt; {
+@@ -32,7 +32,8 @@ describe("T12 — DB logging hygiene", () =&gt; {
+       outcome: assess(ieJordanShortfall),
+     });
+ 
+-    const logged = logSpy.mock.calls
++    const logged = consoleSpies
++      .flatMap((spy) =&gt; spy.mock.calls)
+       .flat()
+       .filter((arg: unknown): arg is string =&gt; typeof arg === "string")
+       .join("\n");
+diff --git a/tests/s4/compute-delta.test.ts b/tests/s4/compute-delta.test.ts
+index 9acc778..268074e 100644
+--- a/tests/s4/compute-delta.test.ts
++++ b/tests/s4/compute-delta.test.ts
+@@ -22,8 +22,11 @@ function toSnapshot(
+ }
+ 
+ describe("computeDelta — dashboard delta computation (S4)", () =&gt; {
+-  it("returns first-snapshot when fewer than two snapshots exist", () =&gt; {
+-    expect(computeDelta([])).toEqual({ kind: "first-snapshot" });
++  it("returns no-snapshot when no snapshots exist", () =&gt; {
++    expect(computeDelta([])).toEqual({ kind: "no-snapshot" });
++  });
++
++  it("returns first-snapshot when exactly one snapshot exists", () =&gt; {
+     expect(
+       computeDelta([
+         toSnapshot("one", "2026-06-01T10:00:00.000Z", iePatSurplus),
+diff --git a/tests/s4/t22-signpost-ubiquity.test.tsx b/tests/s4/t22-signpost-ubiquity.test.tsx
+index cbb1037..6c545ff 100644
+--- a/tests/s4/t22-signpost-ubiquity.test.tsx
++++ b/tests/s4/t22-signpost-ubiquity.test.tsx
+@@ -2,7 +2,8 @@ import { cleanup, render, within } from "@testing-library/react";
+ import { afterEach, describe, expect, it } from "vitest";
+ import { DashboardView } from "../../components/DashboardView";
+ import { assess } from "../../lib/affordability/calculator";
+-import { deltaFirstSnapshot } from "../_fixtures/delta";
++import { deltaFirstSnapshot, deltaNoSnapshot } from "../_fixtures/delta";
++import type { Delta } from "../../lib/affordability/types";
+ import {
+   ieAlexZeroIncome,
+   ieJordanShortfall,
+@@ -16,17 +17,17 @@ describe("T22 — DashboardView: signpost ubiquity", () =&gt; {
+   });
+ 
+   it.each([
+-    ["no-data", ieRileyNoData, "riley"],
+-    ["zero-income", ieAlexZeroIncome, "alex"],
+-    ["shortfall", ieJordanShortfall, "jordan"],
++    ["no-data", ieRileyNoData, "riley", deltaNoSnapshot],
++    ["zero-income", ieAlexZeroIncome, "alex", deltaFirstSnapshot],
++    ["shortfall", ieJordanShortfall, "jordan", deltaFirstSnapshot],
+   ] as const)(
+     "renders a non-empty support link for %s",
+-    (_label, ie, personaId) =&gt; {
++    (_label, ie, personaId, delta: Delta) =&gt; {
+       const outcome = assess(ie);
+       const props = buildDashboardProps({
+         personaId,
+         outcome,
+-        delta: deltaFirstSnapshot,
++        delta,
+       });
+ 
+       const { container } = render(&lt;DashboardView {...props} /&gt;);
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<think><details><summary>Thought Process</summary>
+Organizing atomic commits by theme. The first commit ensures `.data/` exists before opening SQLite in `lib/db/client.ts`.
+
+The next commits cover a persona picker on the home page, a minimal support page, and a dashboard fix to distinguish no-snapshot from first-snapshot deltas.
+
+The remaining commits cover calculator integer arithmetic, database logging hygiene, dashboard persona cookie redirects, and session documentation.</details></think>
+
+_**Agent (default)**_
+
+Creating a feature branch and splitting changes into atomic commits.
+
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git checkout -b feat/s015-post-s4-fixes</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git checkout -b feat/s015-post-s4-fixes
+```
+
+```
+Switched to a new branch 'feat/s015-post-s4-fixes'
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git add lib/db/client.ts && git commit -m "$(cat <<'EOF'
+fix(customer-financial-health): ensure .data directory exists before opening SQLite
+
+Create the parent directory in client.ts so the first DB open does not fail
+when .data/ has not been created yet by migrations.
+EOF
+)"</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git add lib/db/client.ts && git commit -m "$(cat <<'EOF'
+fix(customer-financial-health): ensure .data directory exists before opening SQLite
+
+Create the parent directory in client.ts so the first DB open does not fail
+when .data/ has not been created yet by migrations.
+EOF
+)"
+```
+
+```
+[feat/s015-post-s4-fixes e6be596] fix(customer-financial-health): ensure .data directory exists before opening SQLite
+ 1 file changed, 3 insertions(+)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git add src/app/actions.ts src/app/page.tsx tests/s3/persona-picker.test.tsx && git commit -m "$(cat <<'EOF'
+feat(customer-financial-health): add persona picker on home page
+
+Expose selectPersona server action to set the persona cookie and redirect
+to /dashboard after the user chooses from the seven fixture personas.
+EOF
+)"</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git add src/app/actions.ts src/app/page.tsx tests/s3/persona-picker.test.tsx && git commit -m "$(cat <<'EOF'
+feat(customer-financial-health): add persona picker on home page
+
+Expose selectPersona server action to set the persona cookie and redirect
+to /dashboard after the user chooses from the seven fixture personas.
+EOF
+)"
+```
+
+```
+[feat/s015-post-s4-fixes 8b5085b] feat(customer-financial-health): add persona picker on home page
+ 3 files changed, 120 insertions(+), 2 deletions(-)
+ create mode 100644 src/app/actions.ts
+ create mode 100644 tests/s3/persona-picker.test.tsx
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git add src/app/support/page.tsx tests/s3/support-page.test.tsx && git commit -m "$(cat <<'EOF'
+feat(customer-financial-health): add minimal support page
+
+Provide a static /support route so SupportSignpost and FramingNotice links
+do not 404.
+EOF
+)"</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git add src/app/support/page.tsx tests/s3/support-page.test.tsx && git commit -m "$(cat <<'EOF'
+feat(customer-financial-health): add minimal support page
+
+Provide a static /support route so SupportSignpost and FramingNotice links
+do not 404.
+EOF
+)"
+```
+
+```
+[feat/s015-post-s4-fixes 9e40d26] feat(customer-financial-health): add minimal support page
+ 2 files changed, 33 insertions(+)
+ create mode 100644 src/app/support/page.tsx
+ create mode 100644 tests/s3/support-page.test.tsx
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git add lib/affordability/types.ts lib/dashboard/computeDelta.ts components/DashboardView.tsx tests/_fixtures/delta.ts tests/s4/compute-delta.test.ts tests/s4/t22-signpost-ubiquity.test.tsx tests/s4/t23-no-snapshot-delta.test.tsx && git commit -m "$(cat <<'EOF'
+fix(customer-financial-health): distinguish no-snapshot from first-snapshot delta
+
+Return no-snapshot when no history exists so Riley's no-data dashboard does
+not show first-snapshot placeholder copy.
+EOF
+)"</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git add lib/affordability/types.ts lib/dashboard/computeDelta.ts components/DashboardView.tsx tests/_fixtures/delta.ts tests/s4/compute-delta.test.ts tests/s4/t22-signpost-ubiquity.test.tsx tests/s4/t23-no-snapshot-delta.test.tsx && git commit -m "$(cat <<'EOF'
+fix(customer-financial-health): distinguish no-snapshot from first-snapshot delta
+
+Return no-snapshot when no history exists so Riley's no-data dashboard does
+not show first-snapshot placeholder copy.
+EOF
+)"
+```
+
+```
+[feat/s015-post-s4-fixes 996cb1f] fix(customer-financial-health): distinguish no-snapshot from first-snapshot delta
+ 7 files changed, 52 insertions(+), 8 deletions(-)
+ create mode 100644 tests/s4/t23-no-snapshot-delta.test.tsx
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git add lib/affordability/calculator.ts tests/s1/t5-surplus.test.ts && git commit -m "$(cat <<'EOF'
+fix(customer-financial-health): use integer arithmetic for near-breakeven threshold
+
+Compute the 5% income band with (income * 5) / 100 instead of floating-point
+multiplication.
+EOF
+)"</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git add lib/affordability/calculator.ts tests/s1/t5-surplus.test.ts && git commit -m "$(cat <<'EOF'
+fix(customer-financial-health): use integer arithmetic for near-breakeven threshold
+
+Compute the 5% income band with (income * 5) / 100 instead of floating-point
+multiplication.
+EOF
+)"
+```
+
+```
+[feat/s015-post-s4-fixes e927367] fix(customer-financial-health): use integer arithmetic for near-breakeven threshold
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git add tests/s2/t12-logging-hygiene.test.ts && git commit -m "$(cat <<'EOF'
+test(customer-financial-health): aggregate all console spies in T12 logging hygiene
+
+Scan log, info, debug, warn, and error output when checking DB logging hygiene.
+EOF
+)"</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git add tests/s2/t12-logging-hygiene.test.ts && git commit -m "$(cat <<'EOF'
+test(customer-financial-health): aggregate all console spies in T12 logging hygiene
+
+Scan log, info, debug, warn, and error output when checking DB logging hygiene.
+EOF
+)"
+```
+
+```
+[feat/s015-post-s4-fixes fb52482] test(customer-financial-health): aggregate all console spies in T12 logging hygiene
+ 1 file changed, 8 insertions(+), 7 deletions(-)
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git add src/app/dashboard/page.tsx tests/s3/dashboard-invalid-persona.test.ts && git commit -m "$(cat <<'EOF'
+fix(customer-financial-health): redirect invalid persona cookies to home
+
+Send users back to / when the personaId cookie does not match a known fixture.
+EOF
+)"</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git add src/app/dashboard/page.tsx tests/s3/dashboard-invalid-persona.test.ts && git commit -m "$(cat <<'EOF'
+fix(customer-financial-health): redirect invalid persona cookies to home
+
+Send users back to / when the personaId cookie does not match a known fixture.
+EOF
+)"
+```
+
+```
+[feat/s015-post-s4-fixes 83aaf98] fix(customer-financial-health): redirect invalid persona cookies to home
+ 2 files changed, 35 insertions(+), 1 deletion(-)
+ create mode 100644 tests/s3/dashboard-invalid-persona.test.ts
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git add docs/ai/sessions/S015-fixes.md docs/PROMPT_HISTORY.md .specstory/statistics.json .specstory/history/2026-06-11_07-48-59Z-project-task-list-for-s015.md && git commit -m "$(cat <<'EOF'
+docs(customer-financial-health): record S015 post-S4 fixes session
+
+Add session snapshot, prompt history row, and SpecStory transcript for the
+seven follow-up fixes after S4.
+EOF
+)"</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git add docs/ai/sessions/S015-fixes.md docs/PROMPT_HISTORY.md .specstory/statistics.json .specstory/history/2026-06-11_07-48-59Z-project-task-list-for-s015.md && git commit -m "$(cat <<'EOF'
+docs(customer-financial-health): record S015 post-S4 fixes session
+
+Add session snapshot, prompt history row, and SpecStory transcript for the
+seven follow-up fixes after S4.
+EOF
+)"
+```
+
+```
+[feat/s015-post-s4-fixes 7d20f3e] docs(customer-financial-health): record S015 post-S4 fixes session
+ 4 files changed, 2684 insertions(+)
+ create mode 100644 .specstory/history/2026-06-11_07-48-59Z-project-task-list-for-s015.md
+ create mode 100644 docs/ai/sessions/S015-fixes.md
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2">
+<details><summary>Tool use: **run_terminal_command_v2** • Run command: cd /Users/vinayakhegde/source/personal/customer-financial-health && git status && git log main..HEAD --oneline</summary>
+
+```bash
+cd /Users/vinayakhegde/source/personal/customer-financial-health && git status && git log main..HEAD --oneline
+```
+
+```
+On branch feat/s015-post-s4-fixes
+nothing to commit, working tree clean
+7d20f3e docs(customer-financial-health): record S015 post-S4 fixes session
+83aaf98 fix(customer-financial-health): redirect invalid persona cookies to home
+fb52482 test(customer-financial-health): aggregate all console spies in T12 logging hygiene
+e927367 fix(customer-financial-health): use integer arithmetic for near-breakeven threshold
+996cb1f fix(customer-financial-health): distinguish no-snapshot from first-snapshot delta
+9e40d26 feat(customer-financial-health): add minimal support page
+8b5085b feat(customer-financial-health): add persona picker on home page
+e6be596 fix(customer-financial-health): ensure .data directory exists before opening SQLite
+
+```
+</details>
+</tool-use>
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+
+</details></tool-use>
+
+_**Agent (default)**_
+
+Created branch `feat/s015-post-s4-fixes` with **8 atomic commits**:
+
+| Commit | Message |
+|--------|---------|
+| `e6be596` | `fix(customer-financial-health): ensure .data directory exists before opening SQLite` |
+| `8b5085b` | `feat(customer-financial-health): add persona picker on home page` |
+| `9e40d26` | `feat(customer-financial-health): add minimal support page` |
+| `996cb1f` | `fix(customer-financial-health): distinguish no-snapshot from first-snapshot delta` |
+| `e927367` | `fix(customer-financial-health): use integer arithmetic for near-breakeven threshold` |
+| `fb52482` | `test(customer-financial-health): aggregate all console spies in T12 logging hygiene` |
+| `83aaf98` | `fix(customer-financial-health): redirect invalid persona cookies to home` |
+| `7d20f3e` | `docs(customer-financial-health): record S015 post-S4 fixes session` |
+
+Working tree is clean. Say if you want this pushed or opened as a PR.
