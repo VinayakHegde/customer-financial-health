@@ -101,7 +101,7 @@ export function assess(ie: IncomeAndExpenditure): AffordabilityOutcome {
     };
   }
 
-  const nearBreakevenThreshold = Math.floor(totalIncomePence * 0.05);
+  const nearBreakevenThreshold = Math.floor((totalIncomePence * 5) / 100);
   const nearBreakevenNote =
     disposableIncomePence > 0 && disposableIncomePence <= nearBreakevenThreshold
       ? "You have a little room after your outgoings, but only a small amount relative to your income."
