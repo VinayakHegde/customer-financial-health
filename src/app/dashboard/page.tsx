@@ -14,6 +14,10 @@ export default async function DashboardPage() {
   }
 
   const persona = getPersonaById(personaId);
+  if (!persona) {
+    redirect("/");
+  }
+
   const snapshots = listSnapshots(personaId);
   const latest = snapshots[0];
   const outcome = latest?.outcome ?? assess({ earners: [], expenditure: [] });
@@ -21,7 +25,7 @@ export default async function DashboardPage() {
 
   return (
     <DashboardView
-      personaLabel={persona?.label ?? personaId}
+      personaLabel={persona.label}
       outcome={outcome}
       copy={getCopyForOutcome(outcome.state)}
       delta={delta}
