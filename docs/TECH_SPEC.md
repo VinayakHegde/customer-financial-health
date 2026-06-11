@@ -8,7 +8,7 @@
 > - All architecturally-blocking PRD open questions (Q1–Q5) are either resolved here or carried under §6 **Open questions** with their impact named.
 > - Data shape for `Snapshot` and `IncomeAndExpenditure` is concrete enough that `/test-plan` can write `T*` cases against it without further design.
 > - Page-vs-Component split is explicit for every route, so `/test-plan` knows which surface is async-I/O and which is sync-render.
-> **Status:** Draft (revision 3 — incorporates S007 round-2 critic findings F1.1–F9.3; closes the slice-ordering and WCAG 2.2-specific-SC gaps found in revision 2)
+> **Status:** Draft (revision 4 — append-only stretch addendum from S020: adds S10/S11/S12 design for R11/R12/R13 + R19 test-discipline; existing S1–S9 sections, §2 architecture, and the MVP-scope §6 lines are unchanged. **Post-S020 `@critic` round applied (no PRD changes):** R20/R7 placement on shared-statement and PDF surfaces is now an explicitly-recorded conscious reading; `<ShareUnavailable />` no longer renders `<FramingNotice />` (no outcome on the page); R10 logging-hygiene scoped to application code with the URL-in-access-log limitation acknowledged; S11 "ownership check" reframed under N1; coercion / forwarded-under-pressure risk recorded as a flagged suspicion; `@react-pdf/renderer` "lightweight" claim tagged for `/implement S12` verification. Revision 3 — incorporates S007 round-2 critic findings F1.1–F9.3; closes the slice-ordering and WCAG 2.2-specific-SC gaps found in revision 2)
 
 ---
 
@@ -424,6 +424,269 @@ This slice is intentionally placed last so the documentation reflects what actua
 
 ---
 
+### Stretch slices (S10–S12, append-only addendum from S020)
+
+The three Could-class requirements (R11, R12, R13) are designed below as `S*` slices. They follow the same "one `/implement` session" sizing as S1–S9 but **are spec-only** until a `/implement S10` (or S11 / S12) session is invoked. The MVP architecture in §2 is unchanged; each stretch slice extends an existing module without rewriting it. R19 is the cross-slice test-discipline requirement that attaches to whichever stretch is delivered.
+
+Recommended ordering for stretches (each slice imports only from earlier ones, including MVP slices):
+
+`S10 → S11 → S12`
+
+S11 and S12 both rely on S10's `formatMoney` helper, `currency`, and `countryCode` to render figures correctly in shared statements and PDFs. S11 and S12 are otherwise independent of each other.
+
+---
+
+### S10 — Currency and country_code (stretch)
+
+**Requirements:** R11, R19
+
+**Design.**
+
+- **Type extension** in `lib/affordability/types.ts`. `Snapshot` gains two fields, both literal-narrowed to the only values MVP/stretch ships:
+
+  ```ts
+  type Snapshot = {
+    id: string; customerId: string; takenAt: string;
+    currency: 'GBP';                // ISO 4217; only 'GBP' supported in MVP/stretch
+    countryCode: 'GB';              // ISO 3166-1 alpha-2; only 'GB' supported in MVP/stretch
+    ie: IncomeAndExpenditure;
+    outcome: AffordabilityOutcome;
+  };
+  ```
+
+  Loosening to plain `string` (or to a wider `Currency` union) is recorded in §5 trade-off "S10 currency type narrowing" — the take-home does not introduce a selector, so widening would invent surface area.
+
+- **Drizzle migration** (single new file under `drizzle/`, applied lazy-on-init alongside the existing baseline migration in S2):
+
+  - `ALTER TABLE snapshots ADD COLUMN currency TEXT NOT NULL DEFAULT 'GBP';`
+  - `ALTER TABLE snapshots ADD COLUMN country_code TEXT NOT NULL DEFAULT 'GB';`
+
+  SQLite back-fills every existing row with the column default at `ALTER TABLE` time — so previously-stored MVP snapshots become `GBP` / `GB` automatically without a separate data step. The migration is idempotent because Drizzle's migrator records the migration hash in `__drizzle_migrations` (S2's existing pattern); re-running on a fresh DB produces the same shape.
+
+- **Schema changes** in `lib/db/schema.ts`. Two new Drizzle column declarations on the `snapshots` table; types exported via Drizzle's inference so the repository's `Snapshot` row type picks them up automatically.
+
+- **Repository changes** in `lib/db/snapshots.ts`:
+  - `createSnapshot(input)` accepts optional `currency` and `countryCode`; both default to `'GBP'` / `'GB'` when omitted, so existing call sites in `app/dashboard/update/actions.ts` (S5) compile unchanged.
+  - `listSnapshots` and `getLatestSnapshot` return both fields on every plain `Snapshot` object.
+  - The seeder (`lib/db/seed.ts`) lets the column defaults handle the new fields — no per-persona override.
+
+- **Money formatting helper** in `lib/affordability/format.ts` (new module):
+  - Signature: `formatMoney(pence: number, currency: 'GBP', countryCode: 'GB'): string`.
+  - Body: derives a locale string from `countryCode` (`'GB'` → `'en-GB'` via a small lookup) and calls `Intl.NumberFormat(locale, { style: 'currency', currency }).format(pence / 100)`.
+  - Replaces the hard-coded `Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' })` call sites currently inlined in the MVP UI surfaces (`<DashboardView />` S4, `<UpdateForm />` S5, `<HistoryList />` S6) — the call-sites change but the per-component design notes in S4/S5/S6 are unchanged because the rendered string is the same for the only currency we ship.
+
+- **Read sites that get the new fields for free.** `<DashboardView />`, `<HistoryList />`, the S11 shared statement, and the S12 PDF all read `snapshot.currency` / `snapshot.countryCode` instead of the hard-coded literal — so adding a real selector later is a one-place edit (the form + the type) rather than a sweep.
+
+**Data hygiene (R10).** The new columns carry no PII (ISO codes only). No log lines reference them; the existing S7 logging-hygiene assertion does not need to extend (`/test-plan` decides whether the existing case is reused or a new case is allocated).
+
+**Accessibility (R18).** No new UI surface — `formatMoney` returns the same locale-aware string the MVP already renders. The S4 / S6 contrast / focus / reflow commitments are unchanged.
+
+**What this slice does NOT do.**
+
+- No currency selector or country picker UI.
+- No locale beyond `en-GB`. Multi-currency formatting paths would mean widening the type literals, adding a selector, and adding a tone-token review for currency-aware copy — out for stretch.
+- No locale-specific date or number formatting changes elsewhere; only money formatting flows through the new helper.
+
+**Tests (R19) — coverage commitments for the eventual `/implement S10` session:**
+
+- **Migration applied.** Open a `:memory:` DB via `makeDb()` (S7), run all migrations, query the `snapshots` table schema, assert `currency` and `country_code` columns exist as `TEXT NOT NULL` with defaults `'GBP'` / `'GB'`.
+- **Default backfill.** Insert a snapshot via `createSnapshot({...})` without specifying `currency` / `countryCode`; assert the returned plain `Snapshot` carries `currency: 'GBP'`, `countryCode: 'GB'`.
+- **Repository round-trip.** Explicit `createSnapshot({ ..., currency: 'GBP', countryCode: 'GB' })` + `getLatestSnapshot` returns both fields; `listSnapshots` returns both fields on every row in newest-first order.
+- **Format helper.** `formatMoney(123450, 'GBP', 'GB')` returns `'£1,234.50'`; `formatMoney(0, 'GBP', 'GB')` returns `'£0.00'`; negative pence renders with the locale's minus sign.
+- **Existing render assertions still pass.** The S4 / S5 / S6 render tests run without modification because the on-screen string is identical.
+- **Logging hygiene unchanged.** The S2 / S5 logging-hygiene tests still pass — no IE digits, no customer-id strings, no currency / country values appear in `console.*`.
+
+---
+
+### S11 — Secure time-limited statement sharing (stretch)
+
+**Requirements:** R12, R19
+
+**Design.** A customer can mint a 24-hour read-only link for any of their own immutable snapshots. The recipient opens the link in a browser (no login, no app install) and sees the same affordability surface as the dashboard, rendered read-only with the framing notice and a static support signpost. Minimal threat model recorded inline.
+
+- **New persistence table** (new Drizzle migration, applied alongside the S2 baseline):
+
+  ```sql
+  CREATE TABLE share_links (
+    id            TEXT PRIMARY KEY,             -- crypto.randomUUID()
+    snapshot_id   TEXT NOT NULL REFERENCES snapshots(id),
+    token_hash    TEXT NOT NULL UNIQUE,         -- SHA-256 hex of raw token
+    expires_at    TEXT NOT NULL,                -- ISO 8601 UTC
+    created_at    TEXT NOT NULL                 -- ISO 8601 UTC
+  );
+  CREATE INDEX idx_share_links_token_hash ON share_links (token_hash);
+  ```
+
+  `customer_id` is deliberately not stored on `share_links` — the join through `snapshot_id → snapshots.customer_id` is the customer scope. Keeps the table narrow and the leak surface smaller. There is no revocation column; revocation is deferred (§5 trade-off "S11 revocation deferred").
+
+- **Token model:**
+  - The Server Action generates 32 bytes from `crypto.randomBytes(32)` and encodes them with `base64url` (~43 chars). The raw token is included **once**, in the URL returned to the caller, and is **never** persisted.
+  - The DB stores `token_hash = sha256(rawToken).hex()`. A leaked DB does not yield usable links — an attacker would need to brute-force the SHA-256 preimage of a 32-byte token.
+  - The lookup path computes the same SHA-256 hash on the incoming `[token]` segment and queries `share_links.token_hash`.
+
+- **New Server Action** (`app/dashboard/share/actions.ts`, `'use server'`) — `createShareLinkAction(formData)`:
+  1. `await getPersonaId()`. Missing → `{ ok: false, errors: [{ field: '_', message: 'Please pick a persona first.' }] }`.
+  2. Read `snapshotId` from `FormData`. Look up `snapshots` by id; if no row OR `snapshot.customerId !== personaId`, return the **same** generic typed error message — no information leak about which IDs exist for other personas.
+  3. Generate the 32-byte token, compute `token_hash`, insert one `share_links` row with `expires_at = now + 24h`, `created_at = now`, `id = crypto.randomUUID()`.
+  4. Return `{ ok: true, url: '/share/' + rawToken, expiresAt }`. Caller renders the URL in a copy-to-clipboard input on the originating page.
+
+- **New repository** (`lib/db/share-links.ts`):
+  - `createShareLink({ snapshotId, tokenHash, expiresAt })` → `{ id, expiresAt }`.
+  - `getShareLinkByTokenHash(tokenHash, now: Date)` → `{ snapshotId } | null`. The `now` parameter is injected so tests can pin the clock without mocking the global `Date`. Returns `null` for an expired row, the same as for a missing row — the resolver surface cannot distinguish.
+  - `getSnapshotById(id)` is added to S2's existing `lib/db/snapshots.ts` repository (a small append; the existing `createSnapshot` / `listSnapshots` / `getLatestSnapshot` shapes are unchanged).
+
+- **New token helpers** (`lib/share/token.ts`):
+  - `generateShareToken(): { raw: string; hash: string }` — random 32 bytes + base64url + sha256-hex.
+  - `hashShareToken(raw: string): string` — sha256-hex; used by the resolver.
+
+- **New page** (`app/share/[token]/page.tsx`, async Server Component):
+  1. `await params` (Next.js 16 — `params` is a `Promise`, see `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/route.md`).
+  2. Compute `hashShareToken(token)`.
+  3. `await getShareLinkByTokenHash(hash, new Date())`. If `null`, render `<ShareUnavailable />` — a single page with a generic safe message ("This link is no longer available. Please ask the person who shared it to send a new one."). Same copy and same HTTP status (200) regardless of cause; no leak of "exists-but-expired" vs "never existed".
+  4. Otherwise, fetch the linked snapshot via `getSnapshotById` and render `<SharedStatementView snapshot={snapshot} />`.
+
+- **New presentational components** (sync, props-only — unit-test surface):
+  - `<SharedStatementView snapshot={...} />` — renders disposable income, band chip, reasons, income / expenditure breakdown using the same outcome data shape that `<DashboardView />` (S4) renders. No persona name, no "Switch persona" link, no Update / History actions, no `<AppHeader />` persona-aware nav. Renders `<SupportSignpost />` and `<FramingNotice />`. All money is formatted via S10's `formatMoney(pence, snapshot.currency, snapshot.countryCode)`.
+
+    **R20 + R7 broadening — conscious reading recorded here, not silently inherited.** R20's literal wording is "every outcome screen" and R7's is "every outcome surface". S007 round-2 F2.1 narrowed S9 to `/dashboard` + `/history` because those are the only outcome screens **inside the customer's own session**. `<SharedStatementView />` is a **read-only outcome surface for the recipient** — it shows the same disposable / band / reasons that `<DashboardView />` shows, just without the persona-aware actions. The recipient is exactly the audience R20 + R7 are written for: someone looking at an affordability assessment who needs to be told "this is not financial advice" (R20) and given a route to human support (R7). We therefore consciously read R20 + R7 as covering this surface; the §7 traceability rows for R7 and R20 are extended in this revision to list S11. `<ShareUnavailable />` is **not** an outcome surface (no affordability state on the page) and is excluded — see the next bullet. If a future PRD revision wants to narrow R20 / R7 back to "outcome screens within an authenticated session", that is a `/prd` change and this slice's placement is the right place to revisit.
+  - `<ShareUnavailable />` — a single sectioned page with the generic message ("This link is no longer available …"). **No `<FramingNotice />` and no `<SupportSignpost />`** — `<ShareUnavailable />` is not an outcome screen (no affordability state on the page), so neither R20 nor R7 attaches; rendering them here would re-open the same gate-cross pattern S007 round-2 F2.1 closed when it narrowed S9 to outcome screens. No back-link to a customer-facing route (the recipient may not be the snapshot's owner).
+  - `<ShareSnapshotForm snapshotId={...} />` — Client Component (`'use client'`) that posts to `createShareLinkAction` and renders the returned URL in a `<input readOnly>` plus a "Copy link" button. Rendered **inside** existing surfaces: once in `<DashboardView />` (latest-snapshot share) and once per row in `<HistoryList />` (any owned snapshot share). Adding the form to those components is a per-slice edit done by `/implement S11`; the §3 entries for S4 and S6 are not rewritten.
+
+- **Threat model summary (deliberate scope cap; honest about N1).**
+  - **In-scope as design commitments:** raw-token-not-stored guarantee (only the SHA-256 hash is persisted); 24-hour expiry; persona-cookie ownership check at mint time; same generic copy + status (200) on resolver miss / expiry / unknown token; no rendering of customer-name PII to the recipient.
+  - **N1 honesty — the "ownership check at mint" is bounded by the no-real-auth posture.** PRD N1 names "no real authentication; demo uses fixed mock customers"; S3's persona cookie is unsigned, `HttpOnly` + `Lax` + 30-day Max-Age, and is set by clicking a persona on `/`. The mint-time ownership check therefore guarantees only that the *caller's persona-cookie identity* matches the snapshot's `customerId` — it is a **UX selector that prevents accidental cross-persona sharing in the demo**, not a security control on top of an authenticated identity. An attacker who can read or set the persona cookie can mint share links for that persona's snapshots. Same N1 ceiling applies to S12. A real-auth round (out per N1) would tighten this; until then, S11's posture is "no information leak between personas during normal demo use", not "authenticated authorisation".
+  - **Acknowledged but not closed:** anyone who obtains the URL within 24h gets read access (no recipient identity); single-use is deferred (§5 trade-off "S11 single-use deferred"); revocation is deferred (§5 trade-off "S11 revocation deferred"); rate limiting is deferred (§6 Out of scope); the raw bearer token rides in the URL path so any web-server access log captures it (§5 trade-off "S11 + S12 access-log limitation"); coercion / forwarded-under-pressure risk is flagged (§5 trade-off "S11 + S12 coercion risk (suspicion)"). A future slice would close any of these — out for stretch.
+
+**Data hygiene (R10) — scoped to application code.**
+
+- **Application-code commitments (testable):** the action never logs the raw token, the token hash, or the snapshot id. Lifecycle log allowed: `share: link created` (with no identifiers). The resolver never logs the incoming `[token]` segment (raw or hashed). On miss/expiry it logs `share: lookup miss` (or omits altogether) — never the hash, never the IE payload. No IE field content (`label`, amounts) appears in any application log line in this slice.
+- **Known limitation (not closeable in stretch):** the share URL is `/share/<rawToken>`. Next.js's own dev-mode request logger and any production access log (web server, reverse proxy, CDN) will record the path verbatim, which means the raw bearer token appears in those logs. Application-level `console.*` spies cannot catch this layer. Mitigations considered and deferred: (a) move the bearer off the URL path (POST-then-redirect with a one-time fragment) — significant UX and link-sharing cost, (b) suppress access logging on `/share/[token]` via Next.js config — out for stretch as it is implementation work that should land with `/implement S11` after a real evaluation, (c) declare the limitation explicitly. Picked **(c)** for the spec; recorded in §5 trade-off "S11 + S12 access-log limitation under R10" and §6 Out of scope. The S11 logging-hygiene test commitment below therefore asserts only the application-code surface, not the framework / infrastructure access log.
+
+**Accessibility (R18).** `<SharedStatementView />` honours the same WCAG 2.2 AA commitments as `<DashboardView />` (§4 cross-cutting): single `<main>` landmark; band chip uses text + icon; ≥ 4.5:1 contrast; visible focus rings; reflow at 400% zoom / 320 CSS-px viewport (SC 1.4.10); SC 2.5.8 24-CSS-px target on every focusable element. The "Copy share link" UI on the originating page uses a real `<button>` + `<input readOnly>` with `aria-describedby` pointing at the human-readable expiry timestamp (not just the ISO).
+
+**What this slice does NOT do.**
+
+- No email / SMS sending of the link — the customer copies the URL themselves.
+- No revocation UI.
+- No account permission model — there is no auth in MVP; a leaked link grants read access to the snapshot until expiry.
+- No rate limiting.
+- No custom expiry — fixed 24 hours.
+- No single-use enforcement — token can be reopened until expiry.
+- No token, snapshot id, or IE payload in any **application** log line. (The framework / access-log layer is acknowledged as a known limitation — see "Data hygiene (R10) — Known limitation".)
+
+**Tests (R19) — coverage commitments for the eventual `/implement S11` session:**
+
+- **Token generation.** `generateShareToken()` returns a fresh `raw` (43-char base64url) on every call; the same `raw` always hashes to the same `hash`; different raws produce different hashes; the hash is 64 lower-case hex chars.
+- **Migration applied.** `share_links` table exists with the columns above; index `idx_share_links_token_hash` exists.
+- **Repository round-trip.** `createShareLink` + `getShareLinkByTokenHash(hash, now)` returns the linked `snapshotId`. With `now > expires_at`, returns `null`. With an unknown `hash`, returns `null`.
+- **Server Action ownership check.** Under `withPersonaCookie('jordan')`, calling the action with `pat`'s snapshot id returns the same generic error as for a non-existent snapshot id. No DB write happens. No `console.*` mention of the snapshot id.
+- **Server Action happy path.** Under `withPersonaCookie('jordan')`, calling the action with `jordan`'s latest snapshot id returns `{ ok: true, url, expiresAt }`. The DB now has one row in `share_links` with the corresponding `token_hash`. The raw token is not anywhere in the database. The returned URL parses to `/share/<43-char base64url>`.
+- **Resolver page logic** (test the page-extracted helper, not the async Server Component itself — per §4 page-vs-component split). Given a fresh DB and a freshly-minted link: `resolveShare(token, now)` returns the snapshot; `resolveShare(token, expiredNow)` returns `null`; `resolveShare('garbage', now)` returns `null`.
+- **`<SharedStatementView />` render.** For each persona's outcome shape, renders disposable / band / reasons / breakdown; renders `<SupportSignpost />` and `<FramingNotice />`; does not render any persona-aware nav, "Update" button, or "Switch persona" link.
+- **`<ShareUnavailable />` render.** Renders the same generic copy regardless of the inferred reason; **does not** render `<FramingNotice />` or `<SupportSignpost />` (R20 / R7 do not attach — the page carries no outcome). Snapshot test confirms no per-reason variation in the rendered string.
+- **Logging hygiene (application-code scope).** `console.*` spy across (a) one happy-path action invocation, (b) one expired-resolver lookup, (c) one unknown-token resolver lookup records zero raw tokens, zero token-hash strings, zero snapshot ids, zero IE-value digits **emitted by application code**. Next.js's own request logger is out of scope for this assertion (see "Data hygiene (R10) — Known limitation" above).
+- **a11y smoke.** `vitest-axe` reports no violations for `<SharedStatementView />` (each persona). The `<ShareUnavailable />` smoke is included for completeness but is not load-bearing for R18 — the page is one heading + one paragraph and will pass trivially; the meaningful R18 surface in S11 is `<SharedStatementView />`.
+
+---
+
+### S12 — PDF export (stretch)
+
+**Requirements:** R13, R19
+
+**Design.** A customer can download a PDF rendering of any owned snapshot. The PDF is generated on demand and streamed back to the browser; nothing is written to disk. The layout uses S10's `formatMoney` helper and S9's framing copy so the PDF's **money strings** cannot drift from the on-screen surface — band labels, reasons, and framing copy are independent code paths and can drift in principle, mitigated by reusing the same `copy.ts` / `framing.ts` source modules.
+
+- **Library choice:** [`@react-pdf/renderer`](https://react-pdf.org). Pure-React PDF renderer with documented `pdf().toBuffer()` API for server-side rendering. Alternatives considered: `pdfkit` (lower-level draw API; would re-implement layout), `puppeteer` / `playwright` (heavy — pulls in Chromium, conflicts with the no-Playwright constraint and the take-home's "don't over-engineer" framing), `jsPDF` (browser-leaning; would push generation to the client and bloat the bundle). Decision recorded in §5 trade-off "S12 PDF library". **Suspicion to verify at `/implement S12` (not in `package.json` / `node_modules` yet):** the "no-headless-browser, no-Chromium-binary, pure-Node" framing — the addendum trusts the upstream README; pinning a concrete version, sanity-checking install size, and confirming the `toBuffer` / `toStream` API surface lands with the implementation slice. If the verification fails, route back here for a library reselection rather than smuggling in a heavier dependency.
+
+- **New Route Handler** (`app/dashboard/snapshot/[id]/pdf/route.ts`) — Next.js 16 Route Handler, returns a binary `Response`:
+
+  ```ts
+  // route.ts
+  export async function GET(
+    _: Request,
+    { params }: { params: Promise<{ id: string }> }
+  ) {
+    const { id } = await params;
+    const personaId = await getPersonaId();
+    if (!personaId) return new Response('Forbidden', { status: 403 });
+    const snapshot = await getSnapshotById(id);
+    if (!snapshot || snapshot.customerId !== personaId) {
+      return new Response('Not Found', { status: 404 });
+    }
+    const buffer = await renderSnapshotPdfToBuffer(snapshot);
+    return new Response(buffer, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="financial-snapshot-${snapshot.takenAt.slice(0, 10)}.pdf"`,
+        'Cache-Control': 'no-store, private',
+      },
+    });
+  }
+  ```
+
+  Returning HTTP 404 for "not yours" and "not found" alike is intentional — no information leak about which IDs exist for other personas (mirrors the S11 ownership-check posture).
+
+- **PDF document component** (`lib/pdf/SnapshotPdf.tsx`) — a pure React component using `@react-pdf/renderer`'s primitives (`<Document>`, `<Page>`, `<View>`, `<Text>`). Top-to-bottom layout:
+
+  1. **Lightweight branding** — a product title rendered as `<Text>` ("Customer Financial Health · Snapshot"). No logo image asset by default — keeps the PDF deterministic, byte-stable, and avoids an image-encoding step. A simple text wordmark is the lightweight branding.
+  2. **Snapshot date** — the `takenAt` ISO timestamp formatted via `Intl.DateTimeFormat(localeFor(snapshot.countryCode), { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' }).format(...)`.
+  3. **Currency / country line** — explicit "Currency: GBP · Country: GB" so the recipient sees what locale the figures are in.
+  4. **Income total** — formatted via S10's `formatMoney(snapshot.outcome.totalIncomePence, snapshot.currency, snapshot.countryCode)`.
+  5. **Expenditure total** — same helper.
+  6. **Disposable income** — same helper, signed.
+  7. **Band** — text label only (`Surplus` / `Breakeven` / `Shortfall` / `Zero income` / `No data`); no coloured chip. PDF accessibility relies on text, not colour.
+  8. **Reasons** — `outcome.reasons[]` rendered as bulleted lines.
+  9. **Income breakdown** — earner label + amount per row, formatted via `formatMoney`.
+  10. **Expenditure breakdown** — line label + amount per row, formatted via `formatMoney`.
+  11. **Support signpost** — the `<SupportSignpost />` copy block (S4) rendered as `<Text>` plus the support URL in plain text (`"/support"`). No JSX of the React-DOM component (it would not render in a React-PDF tree); the copy strings come from the same `copy.ts` source so the PDF and screen do not diverge in this layer.
+  12. **Framing notice** — the `framingNotice()` body (S9) rendered verbatim, with a heading "About this assessment".
+
+  **R20 + R7 broadening on the PDF — conscious reading recorded here, not silently inherited.** R20's literal wording is "every outcome screen" and R7's is "every outcome surface". S007 round-2 F2.1 narrowed S9 to `/dashboard` + `/history` because those were the only outcome screens in scope at the time. A PDF of a snapshot is a **read-only outcome surface for whoever opens the file** — it shows the same disposable / band / reasons / breakdown that `<DashboardView />` shows, just rendered as a portable document. The reader is exactly the audience R20 + R7 are written for: someone looking at an affordability assessment who needs to be told "this is not financial advice" (R20) and given a route to human support (R7). We therefore consciously read R20 + R7 as covering this surface; the §7 traceability rows for R7 and R20 are extended in this revision to list S12. If a future PRD revision wants to narrow R20 / R7 back to "outcome screens within an authenticated session" or "outcome screens served as HTML", that is a `/prd` change and this slice's placement is the right place to revisit.
+
+- **Renderer wrapper** (`lib/pdf/render.ts`):
+  - `renderSnapshotPdfToBuffer(snapshot: Snapshot): Promise<Buffer>` — wraps `pdf(<SnapshotPdf snapshot={snapshot} />).toBuffer()` from `@react-pdf/renderer`. Tested directly in unit tests; the route handler delegates to it.
+
+- **Authorisation.** The snapshot must belong to `personaId` (persona-cookie identity). Forbidden vs Not Found are both 404 to avoid information leaks.
+
+- **Storage.** None. The buffer streams to the response and is garbage-collected after. No file in `.data/`, no S3, no DB row.
+
+- **Where the download is invoked from.** A new `<DownloadPdfLink snapshotId={...} />` element (a plain `<a href="/dashboard/snapshot/.../pdf">` with `rel="noopener"` and an explicit `download` attribute) is rendered inside `<DashboardView />` (S4 — latest snapshot) and inside `<HistoryList />` (S6 — every owned snapshot row). Adding the link to those components is a per-slice edit done by `/implement S12`; the §3 entries for S4 and S6 are not rewritten.
+
+**Data hygiene (R10) — scoped to application code.**
+
+- **Application-code commitments (testable):** the route handler logs only a lifecycle line (`pdf: rendered`) with no identifiers — no snapshot id, no persona id, no IE-value digits, no disposable amount. Generated buffer is never persisted anywhere. `Cache-Control: no-store, private` prevents intermediate caching of the rendered PDF.
+- **Known limitation (not closeable in stretch):** the PDF route is `/dashboard/snapshot/<id>/pdf`. Next.js's own dev-mode request logger and any production access log will record the path verbatim, which means the snapshot UUID appears in those logs. Same shape as the S11 limitation; same mitigation route considered (move id off path, suppress access logger, declare); same call — declare. Recorded in §5 trade-off "S11 + S12 access-log limitation under R10" and §6 Out of scope. The S12 logging-hygiene test below therefore asserts only the application-code surface, not the framework / infrastructure access log.
+
+**Accessibility (R18).** A PDF is a static document, not an interactive surface. WCAG 2.2 AA targets that apply:
+
+- Band conveyed by text not colour.
+- Clear semantic order of sections (date → currency → totals → band → reasons → breakdown → signpost → framing).
+- Embedded font readable at ≥ 11pt for body text, ≥ 14pt for section headings.
+- Tagged-PDF (full SC 1.3.1 / 1.3.2 semantic structure, screen-reader navigation) is a known limitation of `@react-pdf/renderer` — recorded in §5 trade-off "S12 no tagged-PDF" and as an explicit §6 carry-out.
+
+**What this slice does NOT do.**
+
+- No PDF storage, retention, or CDN delivery.
+- No customer signature, no per-recipient watermark.
+- No integration with S11's shared statement (combining a share link with a PDF download of the shared snapshot is a future slice).
+- No tagged-PDF accessibility tree.
+- No multi-page pagination logic beyond the lib's defaults.
+- No multi-language layout.
+
+**Tests (R19) — coverage commitments for the eventual `/implement S12` session:**
+
+- **Route handler ownership check.** With `withPersonaCookie('jordan')`, requesting `pat`'s snapshot id returns 404. Same response for an unknown snapshot id. No leak of "exists but not yours" vs "doesn't exist".
+- **Route handler missing persona cookie.** Returns 403; no DB read.
+- **Route handler happy path.** With `withPersonaCookie('jordan')` and `jordan`'s latest snapshot id, returns 200 with `Content-Type: application/pdf`, `Content-Disposition: attachment; filename="financial-snapshot-YYYY-MM-DD.pdf"`, `Cache-Control: no-store, private`, and a non-empty body.
+- **PDF byte-prefix.** The response body Buffer starts with the bytes `%PDF-` (asserted as `buffer.slice(0, 5).toString() === '%PDF-'`). Cheap signal that the lib produced a PDF.
+- **`renderSnapshotPdfToBuffer` smoke.** For each persona's `Snapshot` fixture, returns a non-empty Buffer prefixed with `%PDF-`.
+- **Outcome state coverage.** Render PDFs for snapshots with each outcome state (`surplus`, `breakeven`, `shortfall`, `zero-income`, `no-data`); each Buffer starts with `%PDF-` and (using `pdf-parse` or equivalent text extraction in the test) contains the band label, the disposable figure, the framing-notice "not financial advice" phrase, and at least one of the `reasons[]` strings.
+- **`formatMoney` integration.** PDF text contains the same money strings (`'£1,234.50'` etc.) that `<DashboardView />` shows on screen for the same snapshot — sanity check that the **money strings** cannot drift (band labels, reasons, framing copy are reused from the same source modules but live on independent code paths and are not asserted by this test).
+- **Logging hygiene (application-code scope).** A `console.*` spy across one full GET records zero IE-value digits, zero customer-id strings, zero snapshot-id strings **emitted by application code**. Next.js's own request logger is out of scope for this assertion (see "Data hygiene (R10) — Known limitation" above).
+- **No file written.** A spy on `fs.writeFile` / `fs.writeFileSync` confirms zero writes during the GET. Cheap regression guard against an accidental "save copy to disk" addition.
+
+---
+
 ## 4. Cross-cutting concerns
 
 - **Page-vs-Component split for testability.** Every route is structured as an async `page.tsx` that performs all I/O (`await cookies()`, `await listSnapshots(...)`, prop assembly) and a sibling **sync** presentational component (`components/*.tsx`) that takes plain props and returns DOM. This is non-negotiable: Vitest's current runner cannot render async Server Components (`node_modules/next/dist/docs/01-app/02-guides/testing/vitest.md` is explicit), and Next.js 16's `cookies()` / `headers()` / `params` are async. Splitting at this boundary makes the render layer unit-testable without introducing a Playwright runtime in MVP. Pages are not unit-tested; presentational components are. Cross-cutting render-layer commitments (e.g. R20's `<FramingNotice />` and R7's `<SupportSignpost />`) are rendered **inside** the View component (not on the host page) so the unit test catches them.
@@ -465,15 +728,41 @@ This slice is intentionally placed last so the documentation reflects what actua
 - **Page-vs-Component split.** Async Server Components are unsupported by Vitest per the Next.js testing docs, and Next.js 16 makes `cookies()` / `headers()` / `params` async by default. We considered (a) adding Playwright for E2E render tests, (b) using `next/experimental-testing` (does not exist in this version per the in-repo docs), and (c) splitting each route into an async `page.tsx` plus a sync `components/<View>.tsx`. Picked (c): zero new dependencies, every render assertion stays in Vitest, the async-I/O surface is naturally pushed to the smallest possible layer, and `/implement` slices stay one-session-each because the View component lives next to the page in the same slice. The cost is a thin extra component per route — acceptable for the test leverage gained.
 - **No MSW (Mock Service Worker).** The product has no HTTP API surface — there are no `/api/*` route handlers, no `fetch()` calls from the client, no third-party REST calls. All mutations are server-internal Server Action invocations through React's form binding. Server Action handlers are tested as plain async functions (call them directly with `FormData` fixtures) and Next.js's `redirect` / `revalidatePath` are mocked via `vi.mock('next/navigation' | 'next/cache')`. MSW would have no network traffic to intercept and would add a runtime + setup-file footprint for zero coverage gain. If R12 (statement-share link) is later attempted, that will introduce a real HTTP surface (signed URL endpoint) and MSW becomes a candidate again — recorded in the §6 deferral note for R12.
 - **`no-data` band is `null`.** PRD R1 commits to a three-value band schema (surplus / breakeven / shortfall). The no-data outcome has no I&E to compute a band from, so emitting any of the three values would be misleading. Loosened the `AffordabilityOutcome.band` type to `Band | null`; the no-data outcome carries `null`, and the UI suppresses the band chip in that case. PRD R1 is honoured (the three values remain the only valid bands); no R is invented.
-- **Stretch security model for R12 (deferred — S005 handoff).** Not designed here. If `/implement` decides to attempt R12, a new `S*` slice is required first, with a written threat model (link scope, expiry, single-use, revocation, rate limit). Until then, R12 is out (§6).
+- **Stretch security model for R12 (deferred — S005 handoff).** Originally not designed; **resolved by S11 (S020 stretch addendum)**. The threat-model summary lives inside S11; remaining gaps (single-use, revocation, rate limiting) are recorded as their own trade-off / out-of-scope entries below.
+
+### Stretch addendum trade-offs (S020 — S10 / S11 / S12)
+
+- **S10 currency type narrowing (`'GBP'` / `'GB'` literals).** Picked literal-narrowed types over a wider `Currency` union or plain `string` because MVP/stretch ships only `'GBP' / 'GB'`; widening the type would invite call-sites to read non-existent currencies. The migration's column type is `TEXT NOT NULL DEFAULT 'GBP'` so a future selector can land without a schema change — only the TypeScript literal needs widening. Recorded so `/test-plan` does not invent a coverage row for currencies the product does not ship.
+- **S10 locale derived from `country_code`.** Picked deriving `en-GB` from `'GB'` over storing a third `locale` column. Adds a small `localeFor(countryCode)` lookup (one entry today) but keeps the schema narrow. If the product ever needs locale separately from country (e.g. `en-IE` for Ireland-resident GBP customers), a new column lands as a new slice — out for stretch.
+- **S11 random bearer token + SHA-256 hash over signed URL (HMAC).** Considered an HMAC-signed URL (statelessly verify with a server-side secret; no DB row needed). Picked random+hash because: (a) a leaked DB does not leak usable links, (b) revocation can be added later by deleting the row (no key-rotation drama), (c) no secret material to manage in the take-home. The trade-off is a write per mint — fine at the take-home traffic profile. **N1 bound:** "leaked DB does not yield usable links" is bounded by the no-real-auth posture (N1) — an attacker who can read the cookie jar can also typically read the SQLite file, so the asymmetry only protects the link surface against a DB-only leak. Recorded in S11's threat model summary so the addendum does not over-claim.
+- **S11 single-use semantics deferred.** A single-use bearer would require either an atomic `UPDATE share_links SET used_at = ?` on resolve (race-prone in SQLite without an explicit transaction) or a separate "consumed" table. Picked reuse-until-expiry as the simpler primitive that still satisfies R12's literal wording. If a real-world version were built, single-use is the recommended next step — recorded so a follow-up slice has a clear starting point.
+- **S11 revocation deferred.** No revocation column on `share_links`, no "Revoke link" UI. The 24-hour expiry is the only revocation primitive in stretch. Adding revocation needs a new column + a Server Action + UI surface — too large to keep S11 as a one-session slice. Out for stretch.
+- **S11 rate limiting deferred.** No per-persona or per-IP rate limit on link creation or resolution. Acceptable in the take-home traffic profile (one reviewer); a public deployment would need a rate-limit primitive (in-process counter, edge middleware, or a dependency like `@upstash/ratelimit`). Recorded in §6.
+- **S11 same-response posture (resolver) and same-error posture (mint) — separately.** Two distinct surfaces, deliberately not conflated:
+  - **Resolver** (`/share/[token]/page.tsx`) returns the same `<ShareUnavailable />` page (HTTP 200, identical copy, identical response headers) for the only three cases the resolver can see: "token never existed", "token expired", "token resolved but linked snapshot row is missing". The resolver has no concept of "unauthorised" — there is no recipient identity to check against.
+  - **Mint** (`createShareLinkAction`) returns the same generic typed error for "snapshot does not exist" and "snapshot exists but is owned by a different persona" — this is the only place an "unauthorised" arm exists, and it is a mint-time check against the persona-cookie identity (N1-bounded; see the bearer-token trade-off above).
+  - Trades a small UX cost (a recipient cannot tell "the link was never valid" from "the link expired"; a customer cannot tell "this snapshot id is for someone else" from "this snapshot id does not exist") for a clean no-information-leak posture in application code. **Acknowledged but not closed:** response-header parity (`Cache-Control`, etc.) and timing-side-channel parity between hit / miss / expiry are not exercised by the test commitments — recorded so the spec does not over-claim "indistinguishable" at the wire layer.
+- **S11 reintroduces an HTTP surface — MSW reconsidered.** The S5 / §5 "No MSW" trade-off cited "no HTTP API surface" as the deciding factor. S11's `/share/[token]` page is a server-rendered route, not a JSON API, so MSW still does not apply. S12's PDF route handler is the only true HTTP-binary surface; tests call the handler as a plain async function (no `fetch` to mock), so MSW remains unnecessary. Recorded so the "No MSW" stance survives the addendum.
+- **S12 PDF library: `@react-pdf/renderer` over puppeteer / playwright.** Picked `@react-pdf/renderer` for its React-component layout API, documented `pdf().toBuffer()` server rendering, and a stated no-headless-browser footprint — which would match the take-home's "no Playwright / no Chromium" constraint. Puppeteer / playwright would pull in Chromium (~170 MB by current Chrome-for-testing distributions), conflict with the no-Playwright stance, and add a cold-start cost on every PDF request. `pdfkit` was rejected because it is a low-level draw API — re-implementing layout would consume the slice's budget. **Suspicion to verify at `/implement S12`:** the "lightweight, pure-Node, no Chromium binary" framing relies on the upstream README; the addendum does not have a `package.json` / `node_modules` entry to confirm against. `/implement S12` must (a) pin a concrete version, (b) confirm install size and runtime footprint, (c) confirm the `toBuffer` / `toStream` API surface, (d) confirm rasterisation does not invoke a system browser. If any of those fails, route back here for a library reselection rather than smuggling in a heavier dependency. Recorded so a future bigger-budget slice also has a starting point if the layout needs to grow.
+- **S12 no tagged-PDF / SC 1.3.1 + 1.3.2 limitation.** `@react-pdf/renderer` does not emit a tagged-PDF semantic tree; screen-reader navigation of the PDF is best-effort (reading order follows the visual order). Mitigations: text-not-colour for the band, clear semantic headings, ≥ 11 pt body. The HTML surfaces (`<DashboardView />`, `<HistoryList />`) remain the accessible primary surface; the PDF is a supplementary export. Out-of-scope for stretch closure; recorded as a known limitation in §6 and surfaced to `/test-plan` so no `T*` asserts tagged-PDF structure.
+- **S12 no PDF storage.** Generated buffers are streamed straight to the response and never persisted. Picked over disk caching to keep R10 (data minimisation) tight: no PDF-with-IE-payload sitting in `.data/` to forget about, no per-user S3 prefix to worry about, no GDPR-style deletion story. Trade-off: the buffer is recomputed per download (cheap at this scale). If a future deployment needs CDN-cached PDFs, an authenticated-URL pattern with a short TTL is the recommended next step — recorded so a future slice has a starting point.
+- **S11 + S12 access-log limitation under R10.** The share URL `/share/<rawToken>` carries the bearer token in the path and the PDF URL `/dashboard/snapshot/<id>/pdf` carries the snapshot UUID in the path. Next.js's own dev-mode request logger and any production access log (web server, reverse proxy, CDN) will record those paths verbatim, so the bearer / snapshot id will appear in those logs. Application-level `console.*` spies cannot catch this layer. Three options were considered: (a) move the identifier off the URL path (POST-then-redirect with a one-time fragment for S11; opaque per-session id for S12) at the cost of breaking link-sharing UX, (b) suppress access logging on those routes via Next.js / proxy config, recorded in the spec as design-level, (c) declare the limitation explicitly and weaken the R10 logging-hygiene assertions to "application-code scope only". Picked **(c)** — the cleanest take-home call per the S020 critic — because (a) sacrifices the share UX the slice is built around, and (b) is implementation work that should land with `/implement S11` / `/implement S12` after a real evaluation, not be pre-committed in the spec. Recorded in §6 Out of scope as well so reviewers see it in both places. R10's PRD wording is unchanged; the test surface is narrower than the spec's previous draft implied.
+- **S11 + S12 coercion / forwarded-under-pressure risk (suspicion — no PRD citation).** Sharing a snapshot via S11 or downloading a PDF via S12 produces a forwarded artefact that a third party (creditor, employer, family member, abuser) could pressure a customer into producing on demand — an audience PRD §2 names as vulnerable (anxious / ashamed / time-poor; self-declared support needs). The product is not regulated advice (R20), but it does emit a snapshot of an FCA-flavoured affordability read. The PRD does not currently address consent / coercion at the share-and-export layer; tagging this as **suspicion** because no in-repo source supports it as a hard constraint, but credible enough to record. Three options were considered: (1) route a `/prd` round to add a coercion-aware constraint (e.g. an explicit "I want to share this" confirmation, a "shared statements must show a who-you-shared-with reminder", or a non-goal that ties stretches to consent surfaces), (2) design a consent affordance into S11 / S12 here without a PRD anchor (a workflow-rule-2 gate-cross — refused per `.cursor/rules/00-workflow.mdc`), (3) record the risk as a flagged suspicion in §5 + §6, leave the PRD untouched, and revisit only if a reviewer or a future PRD revision picks it up. Picked **(3)** for the S020 round at the user's "no PRD changes" instruction; recorded in §6 Out of scope so it is not lost.
 
 ---
 
 ## 6. Out of scope
 
-- **R11 currency / country_code with migrations** — Could-class; not delivered in this spec. If picked up later, a new slice would add `currency TEXT NOT NULL DEFAULT 'GBP'` + `country_code TEXT NOT NULL DEFAULT 'GB'` to the `snapshots` table and replace the hard-coded `Intl` locale.
-- **R12 secure time-limited statement-sharing link** — Could-class; not designed here. A new `S*` slice is required first; see §5 trade-off note.
-- **R13 PDF export** — Could-class; not designed here.
+- **R11 currency / country_code with migrations** — Could-class; **designed in S10 (stretch addendum)**. Not delivered until `/implement S10` runs. The slice adds `currency TEXT NOT NULL DEFAULT 'GBP'` + `country_code TEXT NOT NULL DEFAULT 'GB'` to the `snapshots` table and replaces the hard-coded `Intl` locale with a `formatMoney(pence, currency, countryCode)` helper.
+- **R12 secure time-limited statement-sharing link** — Could-class; **designed in S11 (stretch addendum)**. Not delivered until `/implement S11` runs. Threat-model summary lives in S11; remaining gaps (single-use, revocation, rate limiting) are explicitly deferred and recorded in §5 trade-offs and (rate limiting) below.
+- **R13 PDF export** — Could-class; **designed in S12 (stretch addendum)**. Not delivered until `/implement S12` runs. The PDF is generated on demand and never stored.
+- **S11 rate limiting on share-link mint and resolve** — out for stretch; the 24-hour expiry is the only abuse-control primitive in S11. Production would need a per-persona / per-IP rate limit (in-process counter, edge middleware, or a dependency such as `@upstash/ratelimit`). Recorded so a future slice has a clear starting point.
+- **S11 single-use link semantics and revocation UI** — out for stretch. Recorded in §5 trade-offs "S11 single-use deferred" and "S11 revocation deferred".
+- **S12 tagged-PDF / SC 1.3.1 + 1.3.2 semantic tree** — out for stretch (limitation of `@react-pdf/renderer`). The HTML surfaces (`<DashboardView />`, `<HistoryList />`) remain the accessible primary surface; the PDF is a supplementary export. Recorded in §5 trade-offs "S12 no tagged-PDF".
+- **S11 + S12 cross-integration** (rendering / downloading a PDF of a *shared* snapshot via a public link) — out for stretch. Each stretch slice is independent; combining them is a future slice with its own threat-model review.
+- **S11 + S12 access-log redaction / token-off-URL redesign** — out for stretch. The bearer token in `/share/<rawToken>` and the snapshot UUID in `/dashboard/snapshot/<id>/pdf` will appear in any web-server / proxy / CDN access log; application-level R10 logging-hygiene tests cannot catch that layer. Three remediations exist (move identifier off URL path; suppress access logging at the framework / proxy layer; declare as a known limitation); stretch declares. Recorded in §5 trade-off "S11 + S12 access-log limitation under R10".
+- **S11 + S12 coercion / forwarded-under-pressure consent affordance** — out for stretch (suspicion-level, no PRD citation). Adding an explicit consent step or a "who you shared this with" reminder would be a workflow-rule-2 gate-cross without an upstream R-row. Recorded in §5 trade-off "S11 + S12 coercion / forwarded-under-pressure risk (suspicion — no PRD citation)" so a future `/prd` revision can pick it up if reviewers want it.
+- **S11 wire-layer indistinguishability of resolver miss / expiry / unknown-token** — out for stretch. Application-code response-body parity is asserted by the test commitments; response-header parity (`Cache-Control`, etc.) and timing-side-channel parity are not exercised. Recorded in §5 trade-off "S11 same-response posture (resolver) and same-error posture (mint) — separately".
 - **Real authentication, account linking, Open Banking, credit-bureau integration** — N1.
 - **Repayment-plan selection / arrangement confirmation / collections workflow / agent-facing UI / `POST /api/arrangements`** — N2, N3, N4 (and `NOTES.md` §7(b)). No code path here can introduce them.
 - **Automated vulnerability classification** — N5. The product never infers vulnerability from numeric input; only the `/support` signpost from R7.
@@ -499,18 +788,18 @@ This slice is intentionally placed last so the documentation reflects what actua
 | R3 | Return later and view prior snapshots | S2 (`listSnapshots`), S6 (`<HistoryList />`) | Order: newest → oldest; all snapshots in record lifetime (A4). |
 | R4 | Tests protect real cases | S7 (infrastructure + coverage commitments) + per-slice tests in S1, S2, S3, S4, S5, S6, S9 | Each `/implement S<n>` ships its own tests against the S7 infrastructure; S7-setup ships first per §3's recommended order. |
 | R5 | Four canonical edge cases as first-class outcomes | S1 (branches a / b / c / d **and** the validation schema for case d), S4 (copy for each state), S5 (Server Action returns typed `ValidationError[]` for case d) | (a) zero-income split into its own outcome state; (b) shortfall; (c) no-data with `band: null`; (d) zod validation in S1 + inline error re-render in S5. |
-| R6 | Tone appropriate for difficulty | S1 (`copy.ts`), S4 (rendering), S5 (`<UpdateForm />` form-copy strings — covered by the tone-token guard test extension), S9 (`framing.ts`), S7 (tone-token guard test scoped to all three of these copy surfaces) | Forbidden-token guard is the testable contract; framing copy additionally guarded against advice-implying tokens. |
-| R7 | Human-support signpost on every outcome surface | S4 (`<SupportSignpost />` rendered inside `<DashboardView />`), S6 (`<SupportSignpost />` rendered inside `<HistoryList />`, both empty and populated states), S7 (signpost-ubiquity test extended to `<HistoryList />`) | Emphasis scales with outcome state via copy variants and font weight, not by colour alone. The empty-state CTA in `<HistoryList />` is a separate element pointing at `/dashboard/update`; the signpost is a distinct element pointing at human support. |
+| R6 | Tone appropriate for difficulty | S1 (`copy.ts`), S4 (rendering), S5 (`<UpdateForm />` form-copy strings — covered by the tone-token guard test extension), S9 (`framing.ts`), S7 (tone-token guard test scoped to all three of these copy surfaces); **S11 (`<ShareUnavailable />` copy + `<SharedStatementView />` reuses S1 / S4 / S9 strings) — inherited via stretch addendum** | Forbidden-token guard is the testable contract; framing copy additionally guarded against advice-implying tokens. S11's `<ShareUnavailable />` adds one new copy string ("This link is no longer available …") that the stretch tone-token guard scans when `/implement S11` runs. |
+| R7 | Human-support signpost on every outcome surface | S4 (`<SupportSignpost />` rendered inside `<DashboardView />`), S6 (`<SupportSignpost />` rendered inside `<HistoryList />`, both empty and populated states), S7 (signpost-ubiquity test extended to `<HistoryList />`); **S11 (`<SharedStatementView />` — outcome surface for the recipient), S12 (PDF support-signpost text block) — both via stretch addendum, conscious-broadening recorded in §3 S11 / S12** | Emphasis scales with outcome state via copy variants and font weight, not by colour alone. The empty-state CTA in `<HistoryList />` is a separate element pointing at `/dashboard/update`; the signpost is a distinct element pointing at human support. **`<ShareUnavailable />` (S11) deliberately does NOT render the signpost** — it carries no outcome, so R7 does not attach (decision recorded in §3 S11). |
 | R8 | 7-persona fixture set | S3 | Per-persona starting £-values pinned in S3; `morgan-drew` is the joint-income (multi-earner) shape. |
 | R9 | Customer understands *why* + *how it has changed* | S1 (`reasons[]`), S4 (Reasoning panel + Delta panel), S9 (framing notice articulates what the result *is not* — completing the "understand what + understand why + understand the limits" arc together with S1/S4) | Plain-language reasons, no formula disclosure. |
-| R10 | Data minimisation; no PII in logs | S1 (no logging in calculator), S2 (lifecycle logs only), S1 / §5 trade-off (no free-text fields), §4 cross-cutting, S7 (logging-hygiene test) | Enforced by test in S7; surface area minimised by removing the free-text `note` field. |
-| R11 | currency + country_code + migrations | — (out of scope; design sketched in §5 / §6) | Could-class; not delivered. |
-| R12 | Time-limited statement-share link | — (out of scope; requires new `S*` + threat model; MSW reconsidered if attempted) | Could-class; not delivered. |
-| R13 | PDF export | — (out of scope) | Could-class; not delivered. |
+| R10 | Data minimisation; no PII in logs | S1 (no logging in calculator), S2 (lifecycle logs only), S1 / §5 trade-off (no free-text fields), §4 cross-cutting, S7 (logging-hygiene test); **S11 + S12 (application-code logging hygiene scoped explicitly; framework / access-log layer carried out via §5 trade-off "S11 + S12 access-log limitation under R10")** | Enforced by test in S7; surface area minimised by removing the free-text `note` field. **Stretch scope:** R10 attaches to S11 + S12 at the application-code layer; the bearer-token-in-URL (S11) and snapshot-id-in-URL (S12) leak via Next.js / proxy access logs is acknowledged as an out-of-stretch limitation rather than closed. |
+| R11 | currency + country_code + migrations | S10 (stretch addendum — designed, not delivered) | Could-class; landed as a designed `S*` in the S020 stretch addendum. Migration adds `currency` / `country_code` defaults; `formatMoney` helper replaces hard-coded `Intl.NumberFormat`. Not implemented until `/implement S10` runs. |
+| R12 | Time-limited statement-share link | S11 (stretch addendum — designed, not delivered) | Could-class; landed as a designed `S*` in the S020 stretch addendum. SHA-256-hashed bearer token, 24-hour expiry, ownership-checked at mint, generic safe message on miss/expiry. Not implemented until `/implement S11` runs. Single-use, revocation, and rate limiting are explicitly deferred (§5, §6). |
+| R13 | PDF export | S12 (stretch addendum — designed, not delivered) | Could-class; landed as a designed `S*` in the S020 stretch addendum. `@react-pdf/renderer` on a Next.js Route Handler; no PDF storage; `Cache-Control: no-store, private`; tagged-PDF deferred. Not implemented until `/implement S12` runs. |
 | R14 | README at repo root | S8 | Refresh at the end of each `/implement` slice. |
 | R15 | DECISIONS.md at repo root | S8 | Includes time-spent table for R17. |
 | R16 | Full AI prompt history retained | S8 | Already enforced by `ai-history` user rule + `.specstory/` capture; S8 keeps `docs/PROMPT_HISTORY.md` current. |
 | R17 | Approximate time spent recorded | S8 | Table in `DECISIONS.md`. |
-| R18 | Screen-reader + motor accessibility | S4 (`<DashboardView />` a11y commitments), S5 (form a11y commitments), S6 (list / time / disclosure semantics), S9 (`<FramingNotice />` landmark), S7 (per-component `vitest-axe` smoke) | Conformance level pinned at **WCAG 2.2 AA**; reflow at 400% zoom / 320 CSS-px (SC 1.4.10). |
-| R19 | Stretch items tested to the R4 standard if delivered | — (conditional on R11/R12/R13 delivery) | Would attach to whichever `S*` slice delivers a Stretch. |
-| R20 | Reflection-not-advice framing on every outcome screen | S9 (design + `<FramingNotice />` + `framing.ts`), S4 / S5 / S6 (rendered placement), S7 (framing-copy and framing-ubiquity tests) | Owns the disclaimer surface that the prior tech-spec draft inlined under R6 + R9 (closes S007 critic F4.3). |
+| R18 | Screen-reader + motor accessibility | S4 (`<DashboardView />` a11y commitments), S5 (form a11y commitments), S6 (list / time / disclosure semantics), S9 (`<FramingNotice />` landmark), S7 (per-component `vitest-axe` smoke); **S10 (no new surface — `formatMoney` returns the same locale-aware string), S11 (`<SharedStatementView />` inherits S4 commitments; `<ShareSnapshotForm />` is a button + readonly input with `aria-describedby`; `<ShareUnavailable />` smoke is included for completeness but is not load-bearing — the page is one heading + one paragraph), S12 (PDF static document; tagged-PDF carry-out per §6) — all via stretch addendum** | Conformance level pinned at **WCAG 2.2 AA**; reflow at 400% zoom / 320 CSS-px (SC 1.4.10). **Stretch scope:** R18 attaches to S11's HTML surfaces in full; S12's PDF is a supplementary export — tagged-PDF semantic structure (SC 1.3.1 / 1.3.2 for screen-reader navigation of the PDF itself) is a known limitation of `@react-pdf/renderer` and is carried out in §6, with the HTML surfaces (`<DashboardView />` / `<HistoryList />`) remaining the accessible primary surface. |
+| R19 | Stretch items tested to the R4 standard if delivered | S10, S11, S12 (test-discipline; conditional on each Stretch's delivery) | Each stretch slice in the S020 addendum carries its own coverage commitments (S10: migration / repository / `formatMoney`; S11: token / repository / Server Action / resolver / `<SharedStatementView />` / `<ShareUnavailable />` / a11y; S12: ownership / handler / PDF byte-prefix / outcome coverage / `formatMoney` integration / no-file-write). `T*` IDs assigned by `/test-plan` once a stretch is picked up. |
+| R20 | Reflection-not-advice framing on every outcome screen | S9 (design + `<FramingNotice />` + `framing.ts`), S4 / S5 / S6 (rendered placement), S7 (framing-copy and framing-ubiquity tests); **S11 (`<SharedStatementView />` — outcome surface for the recipient), S12 (PDF "About this assessment" framing block) — both via stretch addendum, conscious-broadening recorded in §3 S11 / S12** | Owns the disclaimer surface that the prior tech-spec draft inlined under R6 + R9 (closes S007 critic F4.3). **`<ShareUnavailable />` (S11) deliberately does NOT render the framing notice** — it carries no outcome, so R20's "every outcome screen" wording does not attach (decision recorded in §3 S11; mirrors S007 round-2 F2.1 narrowing). If a future PRD revision wants to narrow R20 back from "outcome screen on any device" to "outcome screen within an authenticated session", that is a `/prd` change. |
