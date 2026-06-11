@@ -15,6 +15,13 @@
       "when": 1781211153900,
       "tag": "0001_s10_currency_country",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1781214584282,
+      "tag": "0002_s11_share_links",
+      "breakpoints": true
     }
   ]
 }

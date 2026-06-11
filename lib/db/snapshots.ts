@@ -28,6 +28,7 @@ export type SnapshotRepository = {
   createSnapshot: (input: CreateSnapshotInput) => Snapshot;
   listSnapshots: (customerId: string) => Snapshot[];
   getLatestSnapshot: (customerId: string) => Snapshot | null;
+  getSnapshotById: (id: string) => Snapshot | null;
 };
 
 function rowToSnapshot(row: typeof snapshots.$inferSelect): Snapshot {
@@ -110,6 +111,16 @@ export function createSnapshotRepository(
         .limit(1)
         .get();
 
+      return row ? rowToSnapshot(row) : null;
+    },
+
+    getSnapshotById(id: string): Snapshot | null {
+      const row = db
+        .select()
+        .from(snapshots)
+        .where(eq(snapshots.id, id))
+        .limit(1)
+        .get();
       return row ? rowToSnapshot(row) : null;
     },
   };
