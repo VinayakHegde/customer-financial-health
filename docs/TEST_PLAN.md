@@ -584,48 +584,53 @@ Deliberately **not** tested in MVP (per tech-spec §4, §5, §6):
 
 T15–T17 are reserved (unused); see §1.
 
+**Status values:** `Implemented` — the corresponding Vitest test file ships and passes against the current code. `Pending (manual)` — manual checklist verified by reviewer walkthrough, not by an automated runner (no Vitest path can satisfy these). `Reserved` — intentional gap from an early test-plan numbering pass (T15, T16, T17); see §1 "Skipped test IDs".
+
 | Test case ID | Requirement IDs | Tech-spec section IDs | Status |
 |---|---|---|---|
-| T1 | R1, R5 | S1 | Pending |
-| T2 | R5, R1 | S1 | Pending |
-| T3 | R5, R1 | S1 | Pending |
-| T4 | R1, R5 | S1 | Pending |
-| T5 | R1, R5, R9 | S1 | Pending |
-| T6 | R10, R4 | S1 | Pending |
-| T7 | R5, R4 | S1 | Pending |
-| T8 | R8, R4, R5, R9 | S1, S3 | Pending |
-| T9 | R2, R3, R4 | S2 | Pending |
-| T10 | R2, R4 | S2 | Pending |
-| T11 | R1, R5 | S2 | Pending |
-| T12 | R10 | S2 | Pending |
-| T13 | R8, R4 | S3 | Pending |
-| T14 | R8 | S3 | Pending |
-| T18 | R2, R5, R4 | S5 | Pending |
-| T19 | R5, R10, R4 | S5 | Pending |
-| T20 | R10 | S5 | Pending |
-| T21 | R1, R7, R9, R20 | S4, S9 | Pending |
-| T22 | R7, R6 | S4 | Pending |
-| T23 | R2, R9 | S4, S5 | Pending |
-| T24 | R5, R18 | S5 | Pending |
-| T25 | R5, R18 | S5 | Pending |
-| T26 | R3, R7, R18, R20 | S6, S9 | Pending |
-| T27 | R7 | S6 | Pending |
-| T28 | R20 | S4, S6, S9 | Pending |
-| T29 | R6, R20 | S1 | Pending |
-| T30 | R4 | S7-setup | Pending |
-| T31 | R4 | S7-setup | Pending |
-| T43 | R20, R6 | S9 | Pending |
-| T32 | R20, R18 | S9 | Pending |
-| T33 | R2, R9 | S4 | Pending |
-| T34 | R18 | S4 | Pending |
-| T35 | R5 | S5 | Pending |
-| T36 | R2 | S5 | Pending |
-| T37 | R18 | S5 | Pending |
-| T38 | R6 | S5 | Pending |
-| T39 | R18 | S6 | Pending |
-| T40 | R14 | S8 | Pending (manual) — S018 shipped `README.md` |
-| T41 | R15, R17 | S8 | Pending (manual) — S018 shipped `DECISIONS.md` (incl. time-spent table) |
-| T42 | R16 | S8 | Pending (manual) — S018 backfilled `docs/PROMPT_HISTORY.md` |
-| T44 | R7, R18 | S4 | Pending |
-| T45 | R7 | S4 | Pending |
+| T1 | R1, R5 | S1 | Implemented |
+| T2 | R5, R1 | S1 | Implemented |
+| T3 | R5, R1 | S1 | Implemented |
+| T4 | R1, R5 | S1 | Implemented |
+| T5 | R1, R5, R9 | S1 | Implemented |
+| T6 | R10, R4 | S1 | Implemented |
+| T7 | R5, R4 | S1 | Implemented |
+| T8 | R8, R4, R5, R9 | S1, S3 | Implemented |
+| T9 | R2, R3, R4 | S2 | Implemented |
+| T10 | R2, R4 | S2 | Implemented |
+| T11 | R1, R5 | S2 | Implemented |
+| T12 | R10 | S2 | Implemented |
+| T13 | R8, R4 | S3 | Implemented |
+| T14 | R8 | S3 | Implemented |
+| T15 | — | — | Reserved |
+| T16 | — | — | Reserved |
+| T17 | — | — | Reserved |
+| T18 | R2, R5, R4 | S5 | Implemented |
+| T19 | R5, R10, R4 | S5 | Implemented |
+| T20 | R10 | S5 | Implemented |
+| T21 | R1, R7, R9, R20 | S4, S9 | Implemented |
+| T22 | R7, R6 | S4 | Implemented |
+| T23 | R2, R9 | S4, S5 | Implemented |
+| T24 | R5, R18 | S5 | Implemented |
+| T25 | R5, R18 | S5 | Implemented |
+| T26 | R3, R7, R18, R20 | S6, S9 | Implemented |
+| T27 | R7 | S6 | Implemented |
+| T28 | R20 | S4, S6, S9 | Implemented |
+| T29 | R6, R20 | S1 | Implemented |
+| T30 | R4 | S7-setup | Implemented |
+| T31 | R4 | S7-setup | Implemented |
+| T43 | R20, R6 | S9 | Implemented |
+| T32 | R20, R18 | S9 | Implemented |
+| T33 | R2, R9 | S4 | Implemented |
+| T34 | R18 | S4 | Implemented |
+| T35 | R5 | S5 | Implemented |
+| T36 | R2 | S5 | Implemented |
+| T37 | R18 | S5 | Implemented |
+| T38 | R6 | S5 | Implemented |
+| T39 | R18 | S6 | Implemented |
+| T40 | R14 | S8 | Pending (manual) — S018 shipped `README.md`; S019 refreshed it for the UI-polish surface; verified by reviewer walkthrough on the S019 re-verification of `/implement S8` (D-109) |
+| T41 | R15, R17 | S8 | Pending (manual) — S018 shipped `DECISIONS.md` (incl. time-spent table); S019 added the polish row; verified by reviewer walkthrough on the S019 re-verification of `/implement S8` |
+| T42 | R16 | S8 | Pending (manual) — S018 backfilled `docs/PROMPT_HISTORY.md`; S019 appended its own row; verified by reviewer walkthrough on the S019 re-verification of `/implement S8` |
+| T44 | R7, R18 | S4 | Implemented |
+| T45 | R7 | S4 | Implemented |
 
