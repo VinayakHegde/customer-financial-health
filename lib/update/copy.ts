@@ -1,0 +1,26 @@
+export const updateFormCopy = {
+  pageTitle: "Update income and outgoings",
+  intro: "Enter monthly income and regular outgoings below.",
+  earnersLegend: "Monthly income",
+  expenditureLegend: "Monthly outgoings",
+  nameColumn: "Name",
+  amountColumn: "Amount (£)",
+  variableColumn: "Varies?",
+  actionsColumn: "Actions",
+  earnerLabel: "Income source name",
+  earnerAmount: "Monthly amount",
+  earnerVariable: "Income varies month to month",
+  expenditureLabel: "Outgoing name",
+  expenditureAmount: "Monthly amount",
+  amountHint: "Pounds and pence, e.g., 1234.56",
+  addEarner: "Add another earner",
+  removeEarner: "Remove earner",
+  addExpenditure: "Add another outgoing",
+  removeExpenditure: "Remove outgoing",
+  submit: "Save snapshot",
+  cancel: "Cancel",
+  errorSummaryTitle: "There is a problem",
+  requiredNote: "Complete required fields before saving.",
+} as const;
+
+export const updateFormCopyStrings: string[] = Object.values(updateFormCopy);
