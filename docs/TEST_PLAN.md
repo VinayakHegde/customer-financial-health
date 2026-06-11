@@ -623,9 +623,9 @@ T15–T17 are reserved (unused); see §1.
 | T37 | R18 | S5 | Pending |
 | T38 | R6 | S5 | Pending |
 | T39 | R18 | S6 | Pending |
-| T40 | R14 | S8 | Pending |
-| T41 | R15, R17 | S8 | Pending |
-| T42 | R16 | S8 | Pending |
+| T40 | R14 | S8 | Pending (manual) — S018 shipped `README.md` |
+| T41 | R15, R17 | S8 | Pending (manual) — S018 shipped `DECISIONS.md` (incl. time-spent table) |
+| T42 | R16 | S8 | Pending (manual) — S018 backfilled `docs/PROMPT_HISTORY.md` |
 | T44 | R7, R18 | S4 | Pending |
 | T45 | R7 | S4 | Pending |
 
