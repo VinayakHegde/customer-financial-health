@@ -17,7 +17,15 @@ function snapshotAt(
   takenAt: string,
   ie: Snapshot["ie"],
 ): Snapshot {
-  return { id, customerId, takenAt, ie, outcome: assess(ie) };
+  return {
+    id,
+    customerId,
+    takenAt,
+    currency: "GBP",
+    countryCode: "GB",
+    ie,
+    outcome: assess(ie),
+  };
 }
 
 describe("T26 — HistoryList: empty and populated states", () => {

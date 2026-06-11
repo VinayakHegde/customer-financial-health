@@ -12,6 +12,8 @@ export const snapshots = sqliteTable(
     incomePence: integer("income_pence").notNull(),
     expenditurePence: integer("expenditure_pence").notNull(),
     disposablePence: integer("disposable_pence").notNull(),
+    currency: text("currency").notNull().default("GBP"),
+    countryCode: text("country_code").notNull().default("GB"),
   },
   (table) => [
     index("idx_snapshots_customer_taken").on(table.customerId, table.takenAt),

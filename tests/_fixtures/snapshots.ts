@@ -24,6 +24,8 @@ export function snapshotWithOutcome(state: OutcomeState): Snapshot {
     id: `fixture-snapshot-${state}`,
     customerId: "pat",
     takenAt: "2026-06-01T10:00:00.000Z",
+    currency: "GBP",
+    countryCode: "GB",
     ie,
     outcome,
   };

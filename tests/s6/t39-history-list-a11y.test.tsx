@@ -16,7 +16,15 @@ function snapshotAt(
   takenAt: string,
   ie: Snapshot["ie"],
 ): Snapshot {
-  return { id, customerId, takenAt, ie, outcome: assess(ie) };
+  return {
+    id,
+    customerId,
+    takenAt,
+    currency: "GBP",
+    countryCode: "GB",
+    ie,
+    outcome: assess(ie),
+  };
 }
 
 describe("T39 — HistoryList: accessibility smoke (populated)", () => {

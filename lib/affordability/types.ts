@@ -36,10 +36,16 @@ export type AffordabilityOutcome = {
   irregularIncomeNote?: string;
 };
 
+export type Currency = "GBP";
+
+export type CountryCode = "GB";
+
 export type Snapshot = {
   id: string;
   customerId: string;
   takenAt: string;
+  currency: Currency;
+  countryCode: CountryCode;
   ie: IncomeAndExpenditure;
   outcome: AffordabilityOutcome;
 };
