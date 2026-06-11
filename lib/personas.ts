@@ -124,3 +124,14 @@ export function getPersonaById(id: string): Persona | undefined {
 export function getPersonasForSeeding(): Persona[] {
   return personas.filter((persona) => persona.id !== "riley");
 }
+
+/**
+ * First name (or full label fallback) derived from a Persona.label like
+ * "Pat — comfortable surplus" → "Pat". Used by the dashboard greeting and the
+ * AppHeader persona chip — both surfaces must read the same name, so the
+ * derivation lives here, not in either component.
+ */
+export function personaFirstName(label: string): string {
+  const beforeDash = label.split("—")[0]?.trim() ?? label;
+  return beforeDash.length > 0 ? beforeDash : label;
+}

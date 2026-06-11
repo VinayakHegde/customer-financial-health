@@ -16,6 +16,11 @@ vi.mock("next/headers", () => ({
         personaCookieState.activeId = value;
       }
     },
+    delete: (name: string) => {
+      if (name === PERSONA_COOKIE_NAME) {
+        personaCookieState.activeId = null;
+      }
+    },
   }),
 }));
 

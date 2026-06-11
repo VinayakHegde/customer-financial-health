@@ -9,7 +9,7 @@ export function applyMigrations(
   db: BetterSQLite3Database,
   dbPath: string,
 ): void {
-  console.log(`db: opened path=${dbPath}`);
+  console.log("db: opened");
   mkdirSync(dirname(dbPath), { recursive: true });
   migrate(db, { migrationsFolder: MIGRATIONS_FOLDER });
   console.log("db: migration applied");

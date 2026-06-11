@@ -19,14 +19,24 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("Persona picker on /", () => {
-  it("lists all personas and offers a continue action", () => {
+  it("lists all personas as a radio group and offers a continue action", () => {
     render(<Home />);
 
-    const select = screen.getByLabelText(/persona/i);
-    expect(select).toBeDefined();
+    const personaGroup = screen.getByRole("group", { name: /persona/i });
+    expect(personaGroup).toBeDefined();
+
+    const radios = screen.getAllByRole("radio");
+    expect(radios.length).toBe(personas.length);
 
     for (const persona of personas) {
-      expect(screen.getByRole("option", { name: persona.label })).toBeDefined();
+      const radio = screen.getByDisplayValue(persona.id) as HTMLInputElement;
+      expect(radio.tagName).toBe("INPUT");
+      expect(radio.getAttribute("type")).toBe("radio");
+      expect(radio.getAttribute("name")).toBe("personaId");
+
+      const [namePart] = persona.label.split("—");
+      const name = (namePart ?? persona.label).trim();
+      expect(screen.getByText(name)).toBeDefined();
     }
 
     expect(

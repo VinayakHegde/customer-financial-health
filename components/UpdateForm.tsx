@@ -1,6 +1,15 @@
 "use client";
 
 import {
+  AlertTriangle,
+  ArrowLeft,
+  ClipboardList,
+  Plus,
+  Save,
+  Trash2,
+  Wallet,
+} from "lucide-react";
+import {
   useActionState,
   useEffect,
   useId,
@@ -15,6 +24,7 @@ import type {
 import { updateFormCopy } from "../lib/update/copy";
 import { fieldPathToDomId } from "../lib/update/fieldIds";
 import type { UpdateSnapshotState } from "../lib/update/types";
+import { BackToDashboardLink } from "./BackToDashboardLink";
 
 type UpdateFormProps = {
   prefill?: IncomeAndExpenditure;
@@ -41,10 +51,13 @@ type ExpenditureRow = {
 };
 
 const inputClassName =
-  "w-full rounded-md border border-foreground/20 bg-background px-2 py-1.5 text-sm text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground";
+  "w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted/70 focus-visible:border-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 
-const actionButtonClassName =
-  "inline-flex min-h-6 min-w-6 items-center justify-center rounded-md border border-foreground px-2 py-1 text-sm text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground";
+const ghostButtonClassName =
+  "inline-flex min-h-9 items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-surface-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
+
+const removeButtonClassName =
+  "inline-flex h-9 min-h-9 min-w-9 items-center justify-center rounded-md border border-border bg-surface text-muted transition-colors hover:border-border-strong hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring";
 
 function formatPenceForInput(pence: number): string {
   return (pence / 100).toFixed(2);
@@ -130,7 +143,7 @@ function FieldError({
   }
 
   return (
-    <p id={id} className="mt-1 text-xs text-foreground">
+    <p id={id} className="mt-1 text-xs font-medium text-foreground">
       {message}
     </p>
   );
@@ -192,14 +205,21 @@ export function UpdateForm({
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl font-semibold text-foreground">
-        {updateFormCopy.pageTitle}
-      </h1>
-      <p className="mt-2 text-sm text-foreground">{updateFormCopy.intro}</p>
-      <p className="mt-1 text-sm text-foreground">
-        {updateFormCopy.requiredNote}
-      </p>
+    <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-10">
+      <BackToDashboardLink />
+
+      <header className="fade-in-up mt-4">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted">
+          Edit your figures
+        </p>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          {updateFormCopy.pageTitle}
+        </h1>
+        <p className="mt-3 text-sm leading-relaxed text-muted">
+          {updateFormCopy.intro}
+        </p>
+        <p className="mt-1 text-xs text-muted">{updateFormCopy.requiredNote}</p>
+      </header>
 
       {showErrorSummary && (
         <div
@@ -207,44 +227,55 @@ export function UpdateForm({
           ref={errorSummaryRef}
           role="alert"
           tabIndex={-1}
-          className="mt-6 rounded-lg border border-foreground p-4 text-sm text-foreground"
+          className="fade-in-up mt-6 rounded-2xl border border-border-strong bg-surface-muted p-4 text-sm text-foreground shadow-sm"
         >
-          <h2 className="font-semibold">{updateFormCopy.errorSummaryTitle}</h2>
-          <ul className="mt-2 list-disc space-y-1 pl-5">
-            {errors.map((error) => {
-              const inputPath = validationFieldToInputPath(error.field);
-              const targetId = fieldPathToDomId(inputPath);
-              return (
-                <li key={`${error.field}-${error.message}`}>
-                  {error.field === "_" ? (
-                    error.message
-                  ) : (
-                    <a
-                      href={`#${targetId}`}
-                      className="underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
-                    >
-                      {error.message}
-                    </a>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+          <div className="flex items-start gap-2">
+            <AlertTriangle
+              aria-hidden="true"
+              className="mt-0.5 h-4 w-4 text-foreground"
+            />
+            <div>
+              <h2 className="font-semibold">
+                {updateFormCopy.errorSummaryTitle}
+              </h2>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                {errors.map((error) => {
+                  const inputPath = validationFieldToInputPath(error.field);
+                  const targetId = fieldPathToDomId(inputPath);
+                  return (
+                    <li key={`${error.field}-${error.message}`}>
+                      {error.field === "_" ? (
+                        error.message
+                      ) : (
+                        <a
+                          href={`#${targetId}`}
+                          className="underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+                        >
+                          {error.message}
+                        </a>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </div>
         </div>
       )}
 
-      <form action={formAction} className="mt-6 space-y-8">
-        <fieldset className="rounded-lg border border-foreground/15 p-4">
-          <legend className="px-1 text-base font-semibold text-foreground">
-            {updateFormCopy.earnersLegend}
+      <form action={formAction} className="mt-6 space-y-6">
+        <fieldset className="rounded-2xl border border-border bg-surface p-5 shadow-sm sm:p-6">
+          <legend className="flex items-center gap-2 px-1 text-base font-semibold text-foreground">
+            <Wallet aria-hidden="true" className="h-4 w-4 text-muted" />
+            <span>{updateFormCopy.earnersLegend}</span>
           </legend>
-          <p id={amountHintId} className="mt-2 text-xs text-foreground">
+          <p id={amountHintId} className="mt-2 px-1 text-xs text-muted">
             {updateFormCopy.amountHint}
           </p>
 
-          <div className="mt-3 space-y-3">
+          <div className="mt-4 space-y-3">
             <div
-              className="hidden gap-2 px-1 text-sm font-medium sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto]"
+              className="hidden gap-3 px-1 text-xs font-medium uppercase tracking-wide text-muted sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto]"
               aria-hidden="true"
             >
               <span>{updateFormCopy.nameColumn}</span>
@@ -266,12 +297,12 @@ export function UpdateForm({
               return (
                 <div
                   key={row.id}
-                  className="grid gap-2 border-b border-foreground/10 pb-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] sm:items-start"
+                  className="grid gap-3 rounded-xl border border-border bg-surface-muted p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] sm:items-start sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0"
                 >
                   <div>
                     <label
                       htmlFor={labelId}
-                      className="mb-1 block text-sm font-medium sm:sr-only"
+                      className="mb-1 block text-xs font-medium text-muted sm:sr-only"
                     >
                       {updateFormCopy.earnerLabel}
                     </label>
@@ -290,7 +321,7 @@ export function UpdateForm({
                   <div>
                     <label
                       htmlFor={amountId}
-                      className="mb-1 block text-sm font-medium sm:sr-only"
+                      className="mb-1 block text-xs font-medium text-muted sm:sr-only"
                     >
                       {updateFormCopy.earnerAmount}
                     </label>
@@ -312,29 +343,29 @@ export function UpdateForm({
                     />
                     <FieldError id={amountErrorId} message={amountError} />
                   </div>
-                  <div className="flex min-h-6 items-center">
-                    <label className="inline-flex min-h-6 items-center gap-2 text-sm">
+                  <div className="flex min-h-9 items-center">
+                    <label className="inline-flex min-h-9 items-center gap-2 text-sm text-foreground">
                       <input
                         type="checkbox"
                         name={`earners.${index}.variable`}
                         defaultChecked={row.variable}
                         aria-label={updateFormCopy.earnerVariable}
-                        className="h-6 w-6 rounded border border-foreground/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+                        className="h-6 w-6 rounded border border-border accent-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
                       />
                       <span className="sm:sr-only">
                         {updateFormCopy.earnerVariable}
                       </span>
                     </label>
                   </div>
-                  <div className="flex min-h-6 items-center">
+                  <div className="flex min-h-9 items-center">
                     {earnerRows.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeEarnerRow(index)}
                         aria-label={updateFormCopy.removeEarner}
-                        className={actionButtonClassName}
+                        className={removeButtonClassName}
                       >
-                        ×
+                        <Trash2 aria-hidden="true" className="h-4 w-4" />
                       </button>
                     )}
                   </div>
@@ -343,23 +374,27 @@ export function UpdateForm({
             })}
           </div>
 
-          <button
-            type="button"
-            onClick={addEarnerRow}
-            className={`mt-3 ${actionButtonClassName}`}
-          >
-            + {updateFormCopy.addEarner}
-          </button>
+          <div className="mt-4 flex justify-end">
+            <button
+              type="button"
+              onClick={addEarnerRow}
+              className={ghostButtonClassName}
+            >
+              <Plus aria-hidden="true" className="h-3.5 w-3.5" />
+              <span>{updateFormCopy.addEarner}</span>
+            </button>
+          </div>
         </fieldset>
 
-        <fieldset className="rounded-lg border border-foreground/15 p-4">
-          <legend className="px-1 text-base font-semibold text-foreground">
-            {updateFormCopy.expenditureLegend}
+        <fieldset className="rounded-2xl border border-border bg-surface p-5 shadow-sm sm:p-6">
+          <legend className="flex items-center gap-2 px-1 text-base font-semibold text-foreground">
+            <ClipboardList aria-hidden="true" className="h-4 w-4 text-muted" />
+            <span>{updateFormCopy.expenditureLegend}</span>
           </legend>
 
-          <div className="mt-3 space-y-3">
+          <div className="mt-4 space-y-3">
             <div
-              className="hidden gap-2 px-1 text-sm font-medium sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
+              className="hidden gap-3 px-1 text-xs font-medium uppercase tracking-wide text-muted sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
               aria-hidden="true"
             >
               <span>{updateFormCopy.nameColumn}</span>
@@ -380,12 +415,12 @@ export function UpdateForm({
               return (
                 <div
                   key={row.id}
-                  className="grid gap-2 border-b border-foreground/10 pb-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-start"
+                  className="grid gap-3 rounded-xl border border-border bg-surface-muted p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-start sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0"
                 >
                   <div>
                     <label
                       htmlFor={labelId}
-                      className="mb-1 block text-sm font-medium sm:sr-only"
+                      className="mb-1 block text-xs font-medium text-muted sm:sr-only"
                     >
                       {updateFormCopy.expenditureLabel}
                     </label>
@@ -404,7 +439,7 @@ export function UpdateForm({
                   <div>
                     <label
                       htmlFor={amountId}
-                      className="mb-1 block text-sm font-medium sm:sr-only"
+                      className="mb-1 block text-xs font-medium text-muted sm:sr-only"
                     >
                       {updateFormCopy.expenditureAmount}
                     </label>
@@ -426,15 +461,15 @@ export function UpdateForm({
                     />
                     <FieldError id={amountErrorId} message={amountError} />
                   </div>
-                  <div className="flex min-h-6 items-center">
+                  <div className="flex min-h-9 items-center">
                     {expenditureRows.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeExpenditureRow(index)}
                         aria-label={updateFormCopy.removeExpenditure}
-                        className={actionButtonClassName}
+                        className={removeButtonClassName}
                       >
-                        ×
+                        <Trash2 aria-hidden="true" className="h-4 w-4" />
                       </button>
                     )}
                   </div>
@@ -443,28 +478,33 @@ export function UpdateForm({
             })}
           </div>
 
-          <button
-            type="button"
-            onClick={addExpenditureRow}
-            className={`mt-3 ${actionButtonClassName}`}
-          >
-            + {updateFormCopy.addExpenditure}
-          </button>
+          <div className="mt-4 flex justify-end">
+            <button
+              type="button"
+              onClick={addExpenditureRow}
+              className={ghostButtonClassName}
+            >
+              <Plus aria-hidden="true" className="h-3.5 w-3.5" />
+              <span>{updateFormCopy.addExpenditure}</span>
+            </button>
+          </div>
         </fieldset>
 
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <button
-            type="submit"
-            className="inline-flex min-h-6 min-w-6 items-center justify-center rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
-          >
-            {updateFormCopy.submit}
-          </button>
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
           <a
             href="/dashboard"
-            className="inline-flex min-h-6 min-w-6 items-center justify-center rounded-md border border-foreground px-4 py-2 text-sm font-medium text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-surface-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
           >
-            {updateFormCopy.cancel}
+            <ArrowLeft aria-hidden="true" className="h-4 w-4" />
+            <span>{updateFormCopy.cancel}</span>
           </a>
+          <button
+            type="submit"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-accent px-5 py-2 text-sm font-semibold text-accent-foreground transition-colors hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+          >
+            <Save aria-hidden="true" className="h-4 w-4" />
+            <span>{updateFormCopy.submit}</span>
+          </button>
         </div>
       </form>
     </main>
