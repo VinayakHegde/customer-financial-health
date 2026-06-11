@@ -8,7 +8,7 @@ export {
   copyForZeroIncome,
   getCopyForOutcome,
 } from "./copy";
-export { formatPounds } from "./format";
+export { formatMoney, formatPounds } from "./format";
 export { framingNotice } from "./framing";
 export * from "./types";
 export {
