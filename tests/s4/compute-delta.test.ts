@@ -22,8 +22,11 @@ function toSnapshot(
 }
 
 describe("computeDelta — dashboard delta computation (S4)", () => {
-  it("returns first-snapshot when fewer than two snapshots exist", () => {
-    expect(computeDelta([])).toEqual({ kind: "first-snapshot" });
+  it("returns no-snapshot when no snapshots exist", () => {
+    expect(computeDelta([])).toEqual({ kind: "no-snapshot" });
+  });
+
+  it("returns first-snapshot when exactly one snapshot exists", () => {
     expect(
       computeDelta([
         toSnapshot("one", "2026-06-01T10:00:00.000Z", iePatSurplus),

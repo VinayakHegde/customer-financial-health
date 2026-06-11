@@ -58,6 +58,15 @@ function bandChipLabel(band: Band): { text: string; icon: string } {
 }
 
 function DeltaPanel({ delta }: { delta: Delta }) {
+  if (delta.kind === "no-snapshot") {
+    return (
+      <p>
+        Once you submit your income and outgoings, we&apos;ll show how your
+        position changes over time.
+      </p>
+    );
+  }
+
   if (delta.kind === "first-snapshot") {
     return (
       <p>

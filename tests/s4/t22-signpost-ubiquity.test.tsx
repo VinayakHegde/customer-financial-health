@@ -2,7 +2,8 @@ import { cleanup, render, within } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { DashboardView } from "../../components/DashboardView";
 import { assess } from "../../lib/affordability/calculator";
-import { deltaFirstSnapshot } from "../_fixtures/delta";
+import { deltaFirstSnapshot, deltaNoSnapshot } from "../_fixtures/delta";
+import type { Delta } from "../../lib/affordability/types";
 import {
   ieAlexZeroIncome,
   ieJordanShortfall,
@@ -16,17 +17,17 @@ describe("T22 — DashboardView: signpost ubiquity", () => {
   });
 
   it.each([
-    ["no-data", ieRileyNoData, "riley"],
-    ["zero-income", ieAlexZeroIncome, "alex"],
-    ["shortfall", ieJordanShortfall, "jordan"],
+    ["no-data", ieRileyNoData, "riley", deltaNoSnapshot],
+    ["zero-income", ieAlexZeroIncome, "alex", deltaFirstSnapshot],
+    ["shortfall", ieJordanShortfall, "jordan", deltaFirstSnapshot],
   ] as const)(
     "renders a non-empty support link for %s",
-    (_label, ie, personaId) => {
+    (_label, ie, personaId, delta: Delta) => {
       const outcome = assess(ie);
       const props = buildDashboardProps({
         personaId,
         outcome,
-        delta: deltaFirstSnapshot,
+        delta,
       });
 
       const { container } = render(<DashboardView {...props} />);
