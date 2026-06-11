@@ -14,6 +14,7 @@
     "rulesync:generate": "rulesync generate"
   },
   "dependencies": {
+    "@react-pdf/renderer": "4.5.1",
     "better-sqlite3": "^12.10.0",
     "drizzle-orm": "^0.45.2",
     "lucide-react": "^1.17.0",
@@ -34,6 +35,7 @@
     "@vitejs/plugin-react": "^6.0.2",
     "drizzle-kit": "^0.31.10",
     "jsdom": "^29.1.1",
+    "pdf-parse": "2.4.5",
     "rulesync": "^8.27.0",
     "tailwindcss": "^4",
     "typescript": "^5",
