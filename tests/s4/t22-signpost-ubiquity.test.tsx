@@ -2,8 +2,8 @@ import { cleanup, render, within } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { DashboardView } from "../../components/DashboardView";
 import { assess } from "../../lib/affordability/calculator";
-import { deltaFirstSnapshot, deltaNoSnapshot } from "../_fixtures/delta";
 import type { Delta } from "../../lib/affordability/types";
+import { deltaFirstSnapshot, deltaNoSnapshot } from "../_fixtures/delta";
 import {
   ieAlexZeroIncome,
   ieJordanShortfall,

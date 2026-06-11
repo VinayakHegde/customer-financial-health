@@ -12,7 +12,10 @@ export default function Home() {
       </p>
       <form action={selectPersona} className="mt-6 space-y-4">
         <div>
-          <label htmlFor="personaId" className="block text-sm font-medium text-foreground">
+          <label
+            htmlFor="personaId"
+            className="block text-sm font-medium text-foreground"
+          >
             Persona
           </label>
           <select

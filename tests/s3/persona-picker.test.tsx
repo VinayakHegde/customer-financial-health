@@ -26,9 +26,7 @@ describe("Persona picker on /", () => {
     expect(select).toBeDefined();
 
     for (const persona of personas) {
-      expect(
-        screen.getByRole("option", { name: persona.label }),
-      ).toBeDefined();
+      expect(screen.getByRole("option", { name: persona.label })).toBeDefined();
     }
 
     expect(
