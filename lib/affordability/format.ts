@@ -1,17 +1,5 @@
 import type { CountryCode, Currency, Money } from "./types";
 
-/** Format integer pence as a whole-pound £ string for customer-visible copy. */
-export function formatPounds(pence: Money): string {
-  const pounds = pence / 100;
-  if (Number.isInteger(pounds)) {
-    return `£${pounds.toLocaleString("en-GB")}`;
-  }
-  return `£${pounds.toLocaleString("en-GB", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-}
-
 const localeByCountryCode: Record<CountryCode, string> = {
   GB: "en-GB",
 };
@@ -31,4 +19,16 @@ export function formatMoney(
     style: "currency",
     currency,
   }).format(pence / 100);
+}
+
+/**
+ * GBP-denominated £ string for currency-agnostic call sites (the affordability
+ * calculator's `reasons[]`, which doesn't carry a currency / countryCode and
+ * pre-MVP is GBP-only). Delegates to `formatMoney(_, 'GBP', 'GB')` so dashboard
+ * headline numbers and reason strings stay byte-for-byte identical, and the
+ * tech-spec §S10 source-discipline rule ("no `*Pence / 100` outside
+ * `formatMoney`") holds for this helper too.
+ */
+export function formatPounds(pence: Money): string {
+  return formatMoney(pence, "GBP", "GB");
 }
