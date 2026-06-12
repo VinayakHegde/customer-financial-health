@@ -9,7 +9,7 @@
 > - Forbidden tone and advice-implying token lists are finalised (§2) so `/implement S7-setup` can export them to `tests/_helpers/forbiddenToneTokens.ts`.
 > - No test case requires E2E / Playwright, async Server Component rendering, or the React `useActionState` runtime — per tech-spec §4 / §5 acknowledged limits.
 > - **Stretch gate (R19, conditional):** the `T*` rows in §3 owned by S10 / S11 / S12 (`T46`–`T76`) are spec-only today; when `/implement S10` (or `S11` / `S12`) runs, every `T*` row owned by that slice ships alongside its code. No stretch row is allowed to fall back on the framework / proxy / access-log layer (per tech-spec §5 trade-off "S11 + S12 access-log limitation under R10") or assert PDF pixel layout (per tech-spec §S12 test-scope note).
-> **Status:** Draft (S022 stretch extension — S10 / S11 / S12 test commitments lifted from tech-spec §3 rev 5.1; T46–T76 appended; T15–T17 stay `Reserved` to preserve append-only ordering; MVP T1–T14, T18–T45 are unchanged)
+> **Status:** Draft (S022 stretch extension — S10 / S11 / S12 test commitments lifted from tech-spec §3 rev 5.1; T46–T76 appended; T15–T17 stay `Reserved` to preserve append-only ordering; MVP T1–T14, T18–T45 are unchanged). **S026 status update (2026-06-12):** all stretch rows T46–T76 are now `Implemented` in §7 because S023 / S024 / S025 each shipped the corresponding `tests/s10/`, `tests/s11/`, `tests/s12/` files; T40 / T41 / T42 stay `Pending (manual)` per the §7 status legend (manual checklists with no Vitest path).
 
 ---
 
@@ -519,7 +519,7 @@ Each `T*` is append-only. **Owning slice** is the `/implement` session that ship
 
 ### S10 — Currency and country_code (stretch — spec-only until `/implement S10`)
 
-T46–T51 own the S10 coverage commitments listed in tech-spec §3 S10 "Tests (R19)". All rows are **`Pending (stretch)`** in §7 until `/implement S10` runs.
+T46–T51 own the S10 coverage commitments listed in tech-spec §3 S10 "Tests (R19)". All rows are **`Implemented`** in §7 — `/implement S10` shipped them in S023.
 
 #### T46 — S10: Migration adds `currency` and `country_code` columns
 
@@ -583,7 +583,7 @@ Assertion uses `.toBe(...)` for the positive cases (deterministic in ICU); the n
 
 ### S11 — Secure time-limited statement sharing (stretch — spec-only until `/implement S11`)
 
-T52–T67 + T76 own the S11 coverage commitments listed in tech-spec §3 S11 "Tests (R19)". All rows are **`Pending (stretch)`** in §7 until `/implement S11` runs. Every render row asserts the subtree-scoped persona-leak DOM contract from tech-spec §S11 (F1.3 + F1.8) — neither `<SharedStatementView />` nor `<ShareUnavailable />` nor the `(share)` group's `layout.tsx` may produce DOM elements whose `href`, `aria-label`, or rendered text references a persona id, persona name, `/dashboard`, `/dashboard/update`, or `/history`.
+T52–T67 + T76 own the S11 coverage commitments listed in tech-spec §3 S11 "Tests (R19)". All rows are **`Implemented`** in §7 — `/implement S11` shipped them in S024. Every render row asserts the subtree-scoped persona-leak DOM contract from tech-spec §S11 (F1.3 + F1.8) — neither `<SharedStatementView />` nor `<ShareUnavailable />` nor the `(share)` group's `layout.tsx` may produce DOM elements whose `href`, `aria-label`, or rendered text references a persona id, persona name, `/dashboard`, `/dashboard/update`, or `/history`.
 
 #### T52 — S11: Token generation — base64url + sha256-hex contract
 
@@ -800,7 +800,7 @@ For all three: `createShareLinkAction(formData)` returns `{ ok: false, errors: [
 
 ### S12 — PDF export (stretch — spec-only until `/implement S12`)
 
-T68–T75 own the S12 coverage commitments listed in tech-spec §3 S12 "Tests (R19)". All rows are **`Pending (stretch)`** in §7 until `/implement S12` runs. Per the §1 stretch-discipline rule, every PDF-body row asserts content **presence** via text extraction — no pixel-layout, kerning, line-wrap, page-count, byte-equality, or tagged-PDF assertions.
+T68–T75 own the S12 coverage commitments listed in tech-spec §3 S12 "Tests (R19)". All rows are **`Implemented`** in §7 — `/implement S12` shipped them in S025. Per the §1 stretch-discipline rule, every PDF-body row asserts content **presence** via text extraction — no pixel-layout, kerning, line-wrap, page-count, byte-equality, or tagged-PDF assertions.
 
 #### T68 — S12: Route handler exports `runtime = 'nodejs'`
 
@@ -978,22 +978,22 @@ Every in-scope PRD requirement must appear at least once. **Gaps are explicit.**
 | R8 | Should | T8, T13 | 7-persona fixture set |
 | R9 | Should | T5, T8, T21, T23, T33 | Reasons + delta plain language |
 | R10 | Should | T6, T12, T20; **T49, T50, T51 (S10 — currency / country values and integer-pence invariant)**; **T57, T58, T60, T61, T63, T64, T65, T67 (S11 — application-code logging hygiene + cache/indexing posture + persona-leak DOM contract under `/share/*`)**; **T70, T71, T74, T75 (S12 — application-code logging hygiene + no-file-write spy + cross-persona 404 parity + persona validation)** | Data minimisation / logging (F7.3 scoped to db + action paths). **Stretch broadenings (two conscious readings recorded in tech-spec §S11 + §7 R10 row):** (1) **R10 + R12 cache / indexing posture** — `no-store, private` + `noindex, nofollow` + `robots.txt` disallow on `/share/*`, asserted at the middleware-unit layer (T61) plus the `generateMetadata` robots meta layer (T62 — secondary; R10 cited via the joint reading) and the no-static-render scan (T63); (2) **R10 + R12 no-persona-identity in recipient-facing DOM under `/share/*`** — subtree-scoped persona-leak DOM contract on `<SharedStatementView />` (T64) and `<ShareUnavailable />` (T65) plus structural `<AppHeader />`-import-absence under `app/(share)/**`. **Application-code scope for stretch logging hygiene (T67 / T74):** `console.*` spies only; framework / proxy / CDN access-log content is a known limitation per tech-spec §5 trade-off "S11 + S12 access-log limitation under R10" + §6 — **no `T*` asserts against the access-log layer**. |
-| R11 | Could | T46, T47, T48, T49, T50, T51, T73 | **Designed (stretch):** S10 — migration, default backfill, repository round-trip, `formatMoney` helper, integer-pence invariant preserved at the persistence boundary, logging hygiene; T73 cross-checks `formatMoney` integration on the S12 PDF. **Spec-only until `/implement S10` runs.** |
-| R12 | Could | T52, T53, T54, T55, T56, T57, T58, T59, T60, T61, T62, T63, T64, T65, T66, T67, T76 | **Designed (stretch):** S11 — token, migration, repository, clock helper, Server Action (happy path / ownership / persona validation), resolver (happy path / three miss arms collapse), middleware headers, `generateMetadata` robots, dynamic-route posture, `<SharedStatementView />` + `<ShareUnavailable />` + `<ShareSnapshotForm />` render + a11y, logging hygiene, copy tone guard. **Spec-only until `/implement S11` runs.** |
-| R13 | Could | T68, T69, T70, T71, T72, T73, T74, T75 | **Designed (stretch):** S12 — Route Handler `runtime`, happy-path response shape, ownership 404 parity, persona validation (missing / invalid), `renderSnapshotPdfToBuffer` smoke + outcome state coverage, `formatMoney` integration, logging hygiene, no-file-write spy. **Spec-only until `/implement S12` runs.** |
+| R11 | Could | T46, T47, T48, T49, T50, T51, T73 | **Delivered (stretch):** S10 (S023) — migration, default backfill, repository round-trip, `formatMoney` helper, integer-pence invariant preserved at the persistence boundary, logging hygiene; T73 cross-checks `formatMoney` integration on the S12 PDF. **All rows `Implemented` at S026.** |
+| R12 | Could | T52, T53, T54, T55, T56, T57, T58, T59, T60, T61, T62, T63, T64, T65, T66, T67, T76 | **Delivered (stretch):** S11 (S024) — token, migration, repository, clock helper, Server Action (happy path / ownership / persona validation), resolver (happy path / three miss arms collapse), middleware headers, `generateMetadata` robots, dynamic-route posture, `<SharedStatementView />` + `<ShareUnavailable />` + `<ShareSnapshotForm />` render + a11y, logging hygiene, copy tone guard. **All rows `Implemented` at S026.** |
+| R13 | Could | T68, T69, T70, T71, T72, T73, T74, T75 | **Delivered (stretch):** S12 (S025) — Route Handler `runtime`, happy-path response shape, ownership 404 parity, persona validation (missing / invalid), `renderSnapshotPdfToBuffer` smoke + outcome state coverage, `formatMoney` integration, logging hygiene, no-file-write spy. **All rows `Implemented` at S026.** |
 | R14 | Must | T40 | Manual README checklist |
 | R15 | Must | T41 | Manual DECISIONS checklist |
 | R16 | Must | T42 | Manual prompt-history checklist |
 | R17 | Must | T41 | Time-spent table in DECISIONS |
 | R18 | Should | T24, T25, T32, T34, T37, T39, T44; **T64, T65, T66 (stretch broadening — `<SharedStatementView />`, `<ShareUnavailable />`, `<ShareSnapshotForm />` a11y smoke)** | WCAG 2.2 AA axe smoke + SC 3.3.7 + error-summary focus (T24). **Stretch broadening (R18 conscious reading recorded in tech-spec §7 R18 row):** R18 attaches to S11's HTML surfaces in full — T64 carries the load-bearing axe smoke against `<SharedStatementView />` per persona; T65 is included for completeness (one heading + one paragraph, passes trivially — not load-bearing); T66 covers `<ShareSnapshotForm />` (real `<button>` + labelled `<input readOnly>` + `aria-describedby` to expiry + SC 2.5.8 24×24 hit target). **S12 PDF tagged-PDF (SC 1.3.1 / 1.3.2) is deliberately not asserted** by any `T*` — carry-out per tech-spec §5 trade-off "S12 no tagged-PDF" + §6 (the HTML surfaces remain the accessible primary surface; the PDF is a supplementary export). |
-| R19 | Should | T46–T76 (every stretch row carries an R19 citation) | **Designed (conditional):** every stretch `T*` cites R19 in addition to its feature requirement (R11 for S10; R12 for S11; R13 for S12). The R19 contract — "tested to the R4 standard if delivered" — is enforced row-by-row through branch matrix + validation + repository round-trip + logging hygiene + a11y coverage per slice. Status remains conditional until at least one of `/implement S10` / `S11` / `S12` runs; the moment the first stretch slice lands, R19 has a live `T*` partner alongside it. |
+| R19 | Should | T46–T76 (every stretch row carries an R19 citation) | **Live (delivered):** every stretch `T*` cites R19 in addition to its feature requirement (R11 for S10; R12 for S11; R13 for S12). The R19 contract — "tested to the R4 standard if delivered" — is enforced row-by-row through branch matrix + validation + repository round-trip + logging hygiene + a11y coverage per slice. The gate moved from "designed-conditional" to "live" the moment `/implement S10` (S023) ran; all three stretch slices are now delivered (S023 / S024 / S025) and every R19 row is `Implemented` in §7 at S026. |
 | R20 | Should | T28, T43, T32, T21, T26, T29; **T64, T72 (stretch broadening — `<SharedStatementView />` + PDF "About this assessment" block); T76 (stretch tone surface — `<ShareUnavailable />` advice-implying token guard)** | Framing on outcome screens; advice-implying guard on `copy.ts` incl. `supportSignpost` (T29). **Stretch broadening (R20 conscious reading recorded in tech-spec §S11 + §S12 + §7 R20 row):** R20 attaches to the recipient-facing share surface (T64) and to the PDF surface (T72) because each is a read-only outcome surface for whoever opens it. T76 covers the **advice-implying token half** of R20 on `<ShareUnavailable />`'s single new copy string (paired with its R6 tone half) — note this is the advice-token surface, **not** the framing-presence surface (T65 asserts the framing notice is `<ShareUnavailable />`-absent). `<ShareUnavailable />` (S11) is deliberately **excluded** from the framing-presence half (mirrors S007 round-2 F2.1 narrowing). |
 
 **Must-requirement gate:** R1–R4 and R14–R17 all have ≥1 `T*` — **pass**.
 
-**Should-requirement gate:** R5–R10, R18, R20 covered. **R19 designed-conditional** — every stretch `T*` (T46–T76) cites R19 alongside its feature R; the gate moves from "dormant" to "live" the moment any of `/implement S10` / `S11` / `S12` runs. R6 / R7 / R10 / R18 / R20 also extended into the stretch surfaces per the conscious-broadening readings recorded in tech-spec §S11 / §S12 / §7.
+**Should-requirement gate:** R5–R10, R18, R20 covered. **R19 live (delivered)** — every stretch `T*` (T46–T76) cites R19 alongside its feature R; the gate moved from "dormant" to "live" the moment `/implement S10` (S023) ran, and now all three stretch slices are delivered (S023 / S024 / S025). R6 / R7 / R10 / R18 / R20 also extended into the stretch surfaces per the conscious-broadening readings recorded in tech-spec §S11 / §S12 / §7.
 
-**Stretch gate (R11 / R12 / R13, Could-class):** designed, not delivered. The §3 stretch rows are spec-only artefacts that ship alongside `/implement S10 | S11 | S12` per tech-spec §3 ordering (`S10 → S11 → S12`). Reviewers can read §3 S10 / S11 / S12 as the contract for what each stretch's PR must prove.
+**Stretch gate (R11 / R12 / R13, Could-class): delivered.** All three Could-class requirements shipped with their full R19 same-as-R4 test discipline. R11 → S10 (S023, T46–T51 + T73); R12 → S11 (S024, T52–T67 + T76); R13 → S12 (S025, T68–T75). Every stretch row is `Implemented` in §7 at S026.
 
 ---
 
@@ -1059,7 +1059,7 @@ Deliberately **not** tested by any `T*` row in §3, even after the stretch slice
 
 ### Test plan → implementation (status tracking)
 
-T15–T17 are reserved (unused); see §1. T46–T76 are stretch rows owned by S10 / S11 / S12 and remain `Pending (stretch)` until each `/implement` slice runs.
+T15–T17 are reserved (unused); see §1. T46–T76 were stretch rows owned by S10 / S11 / S12; **all flipped to `Implemented` at S026** because S023 / S024 / S025 shipped the corresponding `tests/s10/`, `tests/s11/`, `tests/s12/` files and `npm test` passes 236 / 236 across 79 files.
 
 **Status values:** `Implemented` — the corresponding Vitest test file ships and passes against the current code. `Pending (manual)` — manual checklist verified by reviewer walkthrough, not by an automated runner (no Vitest path can satisfy these). `Pending (stretch)` — designed test row that ships alongside `/implement S10 | S11 | S12`; spec-only today. `Reserved` — intentional gap from an early test-plan numbering pass (T15, T16, T17); see §1 "Skipped test IDs".
 
@@ -1105,40 +1105,40 @@ T15–T17 are reserved (unused); see §1. T46–T76 are stretch rows owned by S1
 | T37 | R18 | S5 | Implemented |
 | T38 | R6 | S5 | Implemented |
 | T39 | R18 | S6 | Implemented |
-| T40 | R14 | S8 | Pending (manual) — S018 shipped `README.md`; S019 refreshed it for the UI-polish surface; verified by reviewer walkthrough on the S019 re-verification of `/implement S8` (D-109) |
-| T41 | R15, R17 | S8 | Pending (manual) — S018 shipped `DECISIONS.md` (incl. time-spent table); S019 added the polish row; verified by reviewer walkthrough on the S019 re-verification of `/implement S8` |
-| T42 | R16 | S8 | Pending (manual) — S018 backfilled `docs/PROMPT_HISTORY.md`; S019 appended its own row; verified by reviewer walkthrough on the S019 re-verification of `/implement S8` |
+| T40 | R14 | S8 | Pending (manual) — S018 shipped `README.md`; S019 refreshed it for the UI-polish surface; **S026 refreshed it again for the now-three-stretch-shipped repo** (route-group structure, stretch surfaces, refreshed test count, currency / share-link / PDF runbook sections); verified by reviewer walkthrough on the S026 final pass |
+| T41 | R15, R17 | S8 | Pending (manual) — S018 shipped `DECISIONS.md` (incl. time-spent table); S019 added the polish row; **S026 refreshed for the stretch goals delivered, added "Why SQLite + Drizzle / Why Server Actions / Share-link security model / PDF export approach" sections + production-hardening list + time-spent table grounded on `.specstory/statistics.json`**; verified by reviewer walkthrough on the S026 final pass |
+| T42 | R16 | S8 | Pending (manual) — S018 backfilled `docs/PROMPT_HISTORY.md`; S019 appended its own row; **S023 / S024 / S025 / S026 each appended their own row; S026 also backfilled `TBC` raw-transcript paths in S011 / S012 / S013 / S014 / S015 / S018 snapshots**; verified by reviewer walkthrough on the S026 final pass |
 | T44 | R7, R18 | S4 | Implemented |
 | T45 | R7 | S4 | Implemented |
-| T46 | R11, R19 | S10, S2 | Pending (stretch) — designed in S022; ships with `/implement S10` |
-| T47 | R11, R19 | S10, S2 | Pending (stretch) — designed in S022; ships with `/implement S10` |
-| T48 | R11, R19 | S10, S2 | Pending (stretch) — designed in S022; ships with `/implement S10` |
-| T49 | R11, R10, R19 | S10 | Pending (stretch) — designed in S022; ships with `/implement S10` |
-| T50 | R10, R11, R19 | S10, S1, S2 | Pending (stretch) — designed in S022; ships with `/implement S10` |
-| T51 | R10, R11, R19 | S10, S2 | Pending (stretch) — designed in S022; ships with `/implement S10` |
-| T52 | R12, R19 | S11 | Pending (stretch) — designed in S022; ships with `/implement S11` |
-| T53 | R12, R19 | S11 | Pending (stretch) — designed in S022; ships with `/implement S11` |
-| T54 | R12, R19 | S11 | Pending (stretch) — designed in S022; ships with `/implement S11` |
-| T55 | R12, R19 | S11 | Pending (stretch) — designed in S022; ships with `/implement S11` |
-| T56 | R12, R19 | S11 | Pending (stretch) — designed in S022; ships with `/implement S11` |
-| T57 | R12, R10, R19 | S11 | Pending (stretch) — designed in S022; ships with `/implement S11` |
-| T58 | R12, R10, R19 | S11 | Pending (stretch) — designed in S022; ships with `/implement S11` |
-| T59 | R12, R19 | S11 | Pending (stretch) — designed in S022; ships with `/implement S11` |
-| T60 | R12, R10, R19 | S11 | Pending (stretch) — designed in S022; ships with `/implement S11` |
-| T61 | R12, R10, R19 | S11 | Pending (stretch) — designed in S022; ships with `/implement S11` |
-| T62 | R12, R10, R19 | S11 | Pending (stretch) — designed in S022; ships with `/implement S11` |
-| T63 | R12, R10, R19 | S11 | Pending (stretch) — designed in S022; ships with `/implement S11` (R10 added in S022 critic round per F2.2) |
-| T64 | R12, R7, R20, R18, R10, R19 | S11, S10 | Pending (stretch) — designed in S022; ships with `/implement S11` |
-| T65 | R12, R20, R7, R18, R10, R19 | S11 | Pending (stretch) — designed in S022; ships with `/implement S11` |
-| T66 | R12, R18, R19 | S11 | Pending (stretch) — designed in S022; ships with `/implement S11` |
-| T67 | R10, R12, R19 | S11 | Pending (stretch) — designed in S022; ships with `/implement S11` |
-| T68 | R13, R19 | S12 | Pending (stretch) — designed in S022; ships with `/implement S12` |
-| T69 | R13, R19 | S12, S10 | Pending (stretch) — designed in S022; ships with `/implement S12` |
-| T70 | R13, R10, R19 | S12 | Pending (stretch) — designed in S022; ships with `/implement S12` |
-| T71 | R13, R10, R19 | S12 | Pending (stretch) — designed in S022; ships with `/implement S12` |
-| T72 | R13, R19, R20, R7 | S12, S10, S9, S4 | Pending (stretch) — designed in S022; ships with `/implement S12` (R7 + S4 added in S022 critic round per F1.1 + F2.1 — support-signpost text presence asserted on the PDF surface) |
-| T73 | R13, R11, R19 | S12, S10, S4 | Pending (stretch) — designed in S022; ships with `/implement S12` |
-| T74 | R10, R13, R19 | S12 | Pending (stretch) — designed in S022; ships with `/implement S12` |
-| T75 | R10, R13, R19 | S12 | Pending (stretch) — designed in S022; ships with `/implement S12` |
-| T76 | R6, R20, R19, R12 | S11 | Pending (stretch) — designed in S022; ships with `/implement S11` |
+| T46 | R11, R19 | S10, S2 | Implemented — `tests/s10/t46-migration-columns.test.ts` (S023) |
+| T47 | R11, R19 | S10, S2 | Implemented — `tests/s10/t47-default-backfill.test.ts` (S023) |
+| T48 | R11, R19 | S10, S2 | Implemented — `tests/s10/t48-repository-round-trip.test.ts` (S023) |
+| T49 | R11, R10, R19 | S10 | Implemented — `tests/s10/t49-format-money.test.ts` (S023, 5 it blocks after critic F1.4 added the `formattedJordanDisposable` cross-check) |
+| T50 | R10, R11, R19 | S10, S1, S2 | Implemented — `tests/s10/t50-integer-pence-invariant.test.ts` (S023, extended at S023 critic F1.5 to rotate the second-snapshot IE so every persona pair exercises a non-zero delta) |
+| T51 | R10, R11, R19 | S10, S2 | Implemented — `tests/s10/t51-logging-hygiene.test.ts` (S023) |
+| T52 | R12, R19 | S11 | Implemented — `tests/s11/t52-token-contract.test.ts` (S024) |
+| T53 | R12, R19 | S11 | Implemented — `tests/s11/t53-migration.test.ts` (S024) |
+| T54 | R12, R19 | S11 | Implemented — `tests/s11/t54-repository-round-trip.test.ts` (S024) |
+| T55 | R12, R19 | S11 | Implemented — `tests/s11/t55-clock.test.ts` (S024) |
+| T56 | R12, R19 | S11 | Implemented — `tests/s11/t56-action-happy.test.ts` (S024) |
+| T57 | R12, R10, R19 | S11 | Implemented — `tests/s11/t57-action-ownership.test.ts` (S024) |
+| T58 | R12, R10, R19 | S11 | Implemented — `tests/s11/t58-action-persona-validation.test.ts` (S024) |
+| T59 | R12, R19 | S11 | Implemented — `tests/s11/t59-resolve-happy.test.ts` (S024) |
+| T60 | R12, R10, R19 | S11 | Implemented — `tests/s11/t60-resolve-miss-arms.test.ts` (S024) |
+| T61 | R12, R10, R19 | S11 | Implemented — `tests/s11/t61-middleware-headers.test.ts` (S024 — middleware-unit assertion shape closes S021 D-163 / F1.1) |
+| T62 | R12, R10, R19 | S11 | Implemented — `tests/s11/t62-generate-metadata.test.ts` (S024) |
+| T63 | R12, R10, R19 | S11 | Implemented — `tests/s11/t63-no-static-render.test.tsx` (S024; R10 added in S022 critic round per F2.2) |
+| T64 | R12, R7, R20, R18, R10, R19 | S11, S10 | Implemented — `tests/s11/t64-shared-view-render.test.tsx` (S024; tightened at S024 critic F1.1 to use UUID-shaped fixture ids so persona ids never reach `id` / `aria-labelledby` attributes) |
+| T65 | R12, R20, R7, R18, R10, R19 | S11 | Implemented — `tests/s11/t65-share-unavailable.test.tsx` (S024) |
+| T66 | R12, R18, R19 | S11 | Implemented — `tests/s11/t66-share-form.test.tsx` (S024 + S024.2 — Tailwind-utility → pixel-value computation for SC 2.5.8; +2 it blocks for absolute-URL composition + Copy-link button + multi-id `aria-describedby`) |
+| T67 | R10, R12, R19 | S11 | Implemented — `tests/s11/t67-logging-hygiene.test.ts` (S024) |
+| T68 | R13, R19 | S12 | Implemented — `tests/s12/t68-route-runtime.test.ts` (S025) |
+| T69 | R13, R19 | S12, S10 | Implemented — `tests/s12/t69-route-happy.test.ts` (S025) |
+| T70 | R13, R10, R19 | S12 | Implemented — `tests/s12/t70-route-cross-persona-404.test.ts` (S025; tightened at S025.1 F1.4 to assert byte-identical `Content-Type` / `Content-Disposition` / `Cache-Control` across both 404 arms) |
+| T71 | R13, R10, R19 | S12 | Implemented — `tests/s12/t71-route-persona-validation.test.ts` (S025; three sub-cases via `it.each`) |
+| T72 | R13, R19, R20, R7 | S12, S10, S9, S4 | Implemented — `tests/s12/t72-render-outcome-coverage.test.ts` (S025; five outcome states via `it.each`; R7 + S4 added in S022 critic round per F1.1 + F2.1) |
+| T73 | R13, R11, R19 | S12, S10, S4 | Implemented — `tests/s12/t73-format-money-integration.test.tsx` (S025; cross-surface no-drift between `<DashboardView />` rendered HTML + extracted PDF text). **Wording carry-forward:** the row text references `<DashboardView snapshot={snapshot} />`; delivered API uses additive-optional `currency?` / `countryCode?` props (S025 D-236). Reword in a future `/test-plan` round. |
+| T74 | R10, R13, R19 | S12 | Implemented — `tests/s12/t74-logging-hygiene.test.ts` (S025; extended at S025.1 F1.3 to forbid `formatMoney`-formatted £ strings in addition to raw digits + IE labels) |
+| T75 | R10, R13, R19 | S12 | Implemented — `tests/s12/t75-no-file-written.test.ts` (S025; spies on `fs.writeFileSync` / `appendFileSync` / `createWriteStream` + `fs.promises.writeFile` / `appendFile`). **Wording carry-forward:** the row text references `vi.spyOn(fs, 'writeFileSync')`; delivered uses `vi.mock('node:fs', ...)` because Vitest 4 ESM cannot redefine namespace exports (S025 D-238). Reword in a future `/test-plan` round. |
+| T76 | R6, R20, R19, R12 | S11 | Implemented — `tests/s11/t76-share-unavailable-tone.test.ts` (S024) |
 
