@@ -7,7 +7,7 @@
 - Model: Claude Opus 4.7 (agent)
 - Branch: `main`
 - Start commit: `a955968` (S016 / S5 merge)
-- Raw transcript: TBC (SpecStory writes on Cursor window close)
+- Raw transcript: `.specstory/history/2026-06-11_10-09-59Z-historylist-component-implementation-and-tests.md`
 - Related artefacts: `docs/TECH_SPEC.md` (S6), `docs/TEST_PLAN.md` (T26, T27, T28 history half, T39), `docs/PRD.md` (R3, R7, R18, R20)
 
 ## Goal of this Cursor window
