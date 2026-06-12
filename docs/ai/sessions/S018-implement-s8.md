@@ -7,8 +7,9 @@
 - Model: Claude Opus 4.7 (agent)
 - Branch: `main`
 - Start commit: `a1008b9` (after S017 / S6 close)
-- End commit: TBC (uncommitted at session close)
-- Raw transcript: TBC (SpecStory writes on Cursor window close)
+- End commit: merged via PR #21 (closed before S019 began)
+- Raw transcript: `.specstory/history/2026-06-11_11-04-59Z-s8-implementation-details.md`
+- **S026 re-run note (2026-06-12):** the S018 artefacts were the first pass at R14 / R15 / R16 / R17. They have since been refreshed twice — by S019 (UI-polish surface refresh) and by S026 (final submission refresh covering the now-three-stretch-shipped repo). The current state of `README.md` / `DECISIONS.md` / `docs/TEST_PLAN.md` / `docs/PROMPT_HISTORY.md` reflects the S026 close-out, not the S018 close-out. See `docs/ai/sessions/S026-final-implement-s8.md`.
 - Related artefacts: `docs/TECH_SPEC.md` (S8), `docs/TEST_PLAN.md` (T40, T41, T42), `docs/PRD.md` (R14, R15, R16, R17)
 
 ## Goal of this Cursor window

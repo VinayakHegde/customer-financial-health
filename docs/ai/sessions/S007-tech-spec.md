@@ -8,7 +8,7 @@
 - Branch: `main`
 - Start commit: `05cbb37e31bd30dbe928377705ee6f8f08170a0f` (S006 merge into main; tip of `main` at session start)
 - End commit: (in progress — uncommitted at session close)
-- Raw transcript: `.specstory/history/2026-06-10_<TBC>Z-tech-spec.md` (SpecStory writes on Cursor window close; expected filename when this window ends)
+- Raw transcript: `.specstory/history/2026-06-10_19-45-50Z-tech-spec.md`
 - Related artefacts: produces `docs/TECH_SPEC.md` (phase 3 of 5); modifies `docs/PRD.md` (append-only — R20)
 
 ## Goal of this Cursor window

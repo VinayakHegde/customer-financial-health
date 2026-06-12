@@ -7,7 +7,7 @@
 - Model: Claude Opus 4.7 (agent)
 - Branch: `main`
 - Start commit: `591ff1c`
-- Raw transcript: TBC (SpecStory)
+- Raw transcript: `.specstory/history/2026-06-10_22-57-12Z-s4-implementation.md`
 - Related artefacts: `docs/TECH_SPEC.md` (S4), `docs/TEST_PLAN.md` (T21–T23, T33, T34, T22, T28, T44, T45), `docs/PRD.md` (R1, R2, R6, R7, R9, R18, R20)
 
 ## Goal of this Cursor window

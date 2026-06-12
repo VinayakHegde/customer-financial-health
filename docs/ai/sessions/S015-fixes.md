@@ -7,7 +7,7 @@
 - Model: Claude Opus 4.7 (agent)
 - Branch: `main`
 - Start commit: (uncommitted S014 work on `main`)
-- Raw transcript: TBC (SpecStory)
+- Raw transcript: `.specstory/history/2026-06-11_07-48-59Z-project-task-list-for-s015.md`
 - Related artefacts: S2 (`lib/db/client.ts`), S3 (persona picker), S4 (dashboard delta), S1 (near-breakeven)
 
 ## Goal
